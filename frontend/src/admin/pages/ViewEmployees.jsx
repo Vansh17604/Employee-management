@@ -130,10 +130,6 @@ export default function ViewPendingEmployee() {
   };
 
 
-  const handleRefresh = () => {
-    fetchAllPendingEmployees();
-  };
-
  const filteredUsers = pendingEmployees.filter(user => {
   return (
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

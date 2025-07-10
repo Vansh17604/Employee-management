@@ -9,8 +9,8 @@ router.post('/employeeregister',verifyTokenAndAuthorize('admin'), AuthController
 router.post('/normalemployregister',verifyTokenAndAuthorize('admin'),AuthController.RegisterNormalEmployee);
 router.post('/login', AuthController.Login);
 router.post('/validatetoken',verifyTokenAndAuthorize('admin','employee','normalemployee'),AuthController.validateToken);
-router.post('/changepassword/:id',AuthController.ChangePassword);
-router.post('/logout',AuthController.Logout);
-router.get('/getuser/:id',AuthController.GetUserById);
-router.put('/updateprofile/:id',AuthController.UpdateUserProfile);
+router.post('/changepassword/:id',verifyTokenAndAuthorize('admin','employee','normalemployee'),AuthController.ChangePassword);
+router.post('/logout',verifyTokenAndAuthorize('admin','employee','normalemployee'),AuthController.Logout);
+router.get('/getuser/:id',verifyTokenAndAuthorize('admin','employee','normalemployee'),AuthController.GetUserById);
+router.put('/updateprofile/:id',verifyTokenAndAuthorize('admin','employee','normalemployee'),AuthController.UpdateUserProfile);
 module.exports=router
