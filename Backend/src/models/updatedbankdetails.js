@@ -1,0 +1,68 @@
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+
+const updatedBankSchema = new Schema(
+  {
+    employee_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+      required: true,
+    },
+    bank_acc_no: {
+      type: Number,
+      required: true,
+    },
+    bank_acc_name: {
+      type: String,
+      required: true,
+    },
+    bank_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bank",
+      required: true,
+    },
+    branch_name: {
+      type: String,
+      required: true,
+    },
+    ifsc_code: {
+      type: String,
+      required: true,
+    },
+    passbook_image: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    remarks: {
+      type: String,
+    },
+    BankData:[
+      {
+        id:{
+          type:mongoose.Schema.Types.ObjectId,
+          ref:"Bank",
+          required:true
+        },
+        data:{
+           type:Date,
+          required:true
+
+        }
+      }
+    ],status:{
+      type:String,
+      required:true
+    }
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const UpdatedBankDetail = mongoose.model("UpdatedBankDetail", updatedBankSchema);
+module.exports = UpdatedBankDetail;
