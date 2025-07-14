@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Search, CreditCard, Building, IdCard, Edit, Eye } from "lucide-react";
+import { FileText, Search, CreditCard, Building, IdCard, Edit, Eye, MessageCircle, X } from "lucide-react";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import gif from '/assets/Animation - 1747722366024.gif';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,11 @@ import usePanStore from '../../app/panStore';
 import useBankdetailStore from '../../app/bankdetailStore';
 import useAuthStore from '../../app/authStore';
 
-export default function ViewPendingDocuments() {
+export default function AdminRejectedDocuments() {
   const [activeTab, setActiveTab] = useState("aadhar");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
 
   const base_url = import.meta.env.VITE_BASE_URL;
@@ -20,8 +22,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: aadharLoading, 
     error: aadharError, 
-    pendingAadhars, 
-    fetchPendingAadharByUserId,
+    rejectedAadhars, 
+    fetchAllRejectedAadhar,
     clearError: clearAadharError 
   } = useAadharStore();
 
@@ -29,8 +31,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: panLoading, 
     error: panError, 
-    pendingPans, 
-    fetchPendingPanByUserId,
+    rejectedPans, 
+    fetchAllRejectedPans,
     clearError: clearPanError 
   } = usePanStore();
 
@@ -38,8 +40,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: bankLoading, 
     error: bankError, 
-    pendingBankDetails, 
-    fetchPendingBankDetailsByUserId,
+    rejectedBankDetails, 
+    fetchAllRejectedBankDetails,
     clearError: clearBankError 
   } = useBankdetailStore();
 
@@ -53,12 +55,12 @@ export default function ViewPendingDocuments() {
     clearBankError();
       
     if (user && user?.id) {
-      console.log("Fetching documents for user ID:", user.id);
-      fetchPendingAadharByUserId(user?.id);
-      fetchPendingPanByUserId(user?.id);
-      fetchPendingBankDetailsByUserId(user?.id);
+      console.log("Fetching rejected documents for admin ID:", user.id);
+      fetchAllRejectedAadhar();
+      fetchAllRejectedBankDetails();
+      fetchAllRejectedPans(user?.id);
     }
-  }, [clearAadharError, clearPanError, clearBankError, fetchPendingAadharByUserId, fetchPendingPanByUserId, fetchPendingBankDetailsByUserId, user]);
+  }, [clearAadharError, clearPanError, clearBankError, fetchAllRejectedAadhar, fetchAllRejectedPans, fetchAllRejectedBankDetails, user]);
 
   useEffect(() => {
     if (aadharError) {
@@ -99,13 +101,13 @@ export default function ViewPendingDocuments() {
       
       switch (activeTab) {
         case 'aadhar':
-          navigate(`/employee/addaddharedit/${employeeId}/${item._id}`);
+          navigate(`/admin/addaddharedit/${employeeId}/${item._id}`);
           break;
         case 'pan':
-          navigate(`/employee/addpanaddandedit/${employeeId}/${item._id}`);
+          navigate(`/admin/addpanaddandedit/${employeeId}/${item._id}`);
           break;
         case 'bank':
-          navigate(`/employee/addbankdetailandedit/${employeeId}/${item._id}`);
+          navigate(`/admin/addbankdetailandedit/${employeeId}/${item._id}`);
           break;
         default:
           break;
@@ -113,32 +115,42 @@ export default function ViewPendingDocuments() {
     }
   };
 
-  const handleViewDetails = (item) => {
+ const handleViewDetails = (item) => {
     if (item && item._id) {
       switch (activeTab) {
         case 'aadhar':
-          navigate(`/employee/viewaadhar/${item._id}`);
+          navigate(`/admin/adminaddhar/${item._id}`);
           break;
         case 'pan':
-          navigate(`/employee/viewpan/${item._id}`);
+          navigate(`/admin/adminpan/${item._id}`);
           break;
         case 'bank':
-          navigate(`/employee/viewbankdetails/${item._id}`);
+          navigate(`/admin/adminbankdetails/${item._id}`);
           break;
         default:
           break;
       }
     }
+  };
+
+  const handleViewReply = (item) => {
+    setSelectedItem(item);
+    setShowReplyModal(true);
+  };
+
+  const closeReplyModal = () => {
+    setShowReplyModal(false);
+    setSelectedItem(null);
   };
 
   const getCurrentData = () => {
     switch (activeTab) {
       case 'aadhar':
-        return pendingAadhars || [];
+        return rejectedAadhars || [];
       case 'pan':
-        return pendingPans || [];
+        return rejectedPans || [];
       case 'bank':
-        return pendingBankDetails || [];
+        return rejectedBankDetails || [];
       default:
         return [];
     }
@@ -298,8 +310,8 @@ export default function ViewPendingDocuments() {
     if (filteredData.length === 0) {
       return (
         <tr>
-          <td colSpan="10" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-            No pending {activeTab} documents found
+          <td colSpan="11" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+            No rejected {activeTab} documents found
           </td>
         </tr>
       );
@@ -350,27 +362,13 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  {item.status || 'Rejected'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                 
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -378,7 +376,16 @@ export default function ViewPendingDocuments() {
                     className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    View Details
+                    View
+                  </Button>
+                  <Button
+                    onClick={() => handleViewReply(item)}
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Reply
                   </Button>
                 </div>
               </td>
@@ -427,27 +434,13 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  {item.status || 'Rejected'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -455,7 +448,16 @@ export default function ViewPendingDocuments() {
                     className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    View Details
+                    View
+                  </Button>
+                  <Button
+                    onClick={() => handleViewReply(item)}
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Reply
                   </Button>
                 </div>
               </td>
@@ -519,27 +521,13 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  {item.status || 'Rejected'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                 
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -547,7 +535,16 @@ export default function ViewPendingDocuments() {
                     className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    View Details
+                    View
+                  </Button>
+                  <Button
+                    onClick={() => handleViewReply(item)}
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Reply
                   </Button>
                 </div>
               </td>
@@ -558,8 +555,6 @@ export default function ViewPendingDocuments() {
       }
     });
   };
-
-
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -572,7 +567,7 @@ export default function ViewPendingDocuments() {
           </Alert>
         )}
 
-        
+        {/* Tabs */}
         <div className="mb-6">
           <nav className="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
             {tabs.map((tab) => {
@@ -598,7 +593,7 @@ export default function ViewPendingDocuments() {
         <div className="rounded-lg border shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-gray-800 dark:text-white">
-              All Pending {tabs.find(t => t.id === activeTab)?.label}
+              All Rejected {tabs.find(t => t.id === activeTab)?.label}
             </h3>
           
             <div className="mt-4 flex flex-col lg:flex-row gap-4">
@@ -606,7 +601,7 @@ export default function ViewPendingDocuments() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab} documents...`}
+                  placeholder={`Search rejected ${activeTab} documents...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -624,7 +619,7 @@ export default function ViewPendingDocuments() {
                   className="h-16 w-16"
                 />
                 <span className="ml-3 text-gray-600 dark:text-gray-400">
-                  Loading {activeTab} documents...
+                  Loading rejected {activeTab} documents...
                 </span>
               </div>
             ) : (
@@ -642,6 +637,66 @@ export default function ViewPendingDocuments() {
           </div>
         </div>
       </div>
+
+      {/* Reply Modal */}
+      {showReplyModal && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Rejection Reason
+              </h3>
+              <button
+                onClick={closeReplyModal}
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Document Type: <span className="font-medium capitalize">{activeTab}</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Employee ID: <span className="font-medium">{selectedItem.employee_id?.employeeId || 'N/A'}</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Employee Name: <span className="font-medium">{selectedItem.employee_id?.name || 'N/A'}</span>
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Rejection Reason:
+                </h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  {selectedItem.remarks || selectedItem.remarks || 'No reason provided'}
+                </p>
+              </div>
+              
+              {selectedItem.rejected_at && (
+                <div className="mt-4">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Rejected on: {new Date(selectedItem.rejected_at).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+              <Button
+                onClick={closeReplyModal}
+                variant="outline"
+                className="mr-2"
+              >
+                Close
+              </Button>
+             
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,17 +3,28 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AddBankDetailForm from '../forms/AddBankDetails';
 import useBankDetailsStore from '../../app/bankdetailStore';
 import { toast } from 'sonner';
+import useAuthStore from '@/app/authStore';
+import { useLocation } from 'react-router-dom';
+
 
 const AddBankDetailsAddAndEdit = () => {
   const navigate = useNavigate();
   const { employee_id, bankDetailId } = useParams();
-  const { 
-    createBankDetail, 
-    fetchBankDetailByItsId, 
-    editPendingBankDetail, 
-    loading: bankDetailsLoading, 
-    error: bankDetailsError 
-  } = useBankDetailsStore();
+  const location = useLocation();
+const queryParams = new URLSearchParams(location.search);
+const type = queryParams.get("type"); // "approve" or null
+
+  const {user}=useAuthStore();
+ const {
+  createBankDetail,
+  fetchBankDetailByItsId,
+  fetchApprovedBankDetailById,
+  editPendingBankDetail,
+  editApprovedBankDetail,
+  loading: bankDetailsLoading,
+  error: bankDetailsError
+} = useBankDetailsStore();
+
 
   const [initialData, setInitialData] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -26,48 +37,56 @@ const AddBankDetailsAddAndEdit = () => {
     }
   }, [bankDetailId]);
 
-  const fetchBankDetailData = async () => {
-    setDataLoading(true);
-    try {
-      const bankDetailData = await fetchBankDetailByItsId(bankDetailId);
-      
-      if (bankDetailData) {
-        setInitialData(bankDetailData);
-      }
-    } catch (error) {
-      console.error('Error fetching bank detail data:', error);
-    } finally {
-      setDataLoading(false);
+ const fetchBankDetailData = async () => {
+  setDataLoading(true);
+  try {
+    const bankDetailData = type === "approve"
+      ? await fetchApprovedBankDetailById(bankDetailId)
+      : await fetchBankDetailByItsId(bankDetailId);
+
+    if (bankDetailData) {
+      setInitialData(bankDetailData);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching bank detail data:', error);
+  } finally {
+    setDataLoading(false);
+  }
+};
+
 
   const handleSubmit = async (data) => {
-    try {
-      let result;
-      
-      if (isEditMode) {
-        // Edit existing bank detail
-        result = await editPendingBankDetail(bankDetailId, data);
-        if (result) {
-          toast.success('Bank details updated successfully!');
-          navigate('/employee/viewapprov');
-        }
+  try {
+    let result;
+
+    if (isEditMode) {
+      if (type === "approve") {
+        result = await editApprovedBankDetail(bankDetailId, data);
       } else {
-        // Create new bank detail
-        const bankDetailData = {
-          ...data,
-          employee_id,
-        };
-        result = await createBankDetail(bankDetailData);
-        if (result) {
-          toast.success('Bank details added successfully!');
-          navigate('/employee/viewapprov');
-        }
+        result = await editPendingBankDetail(bankDetailId, data);
       }
-    } catch (error) {
-      toast.error(`Error ${isEditMode ? 'updating' : 'adding'} bank details: ${error.message}`);
+
+      if (result) {
+        toast.success('Bank details updated successfully!');
+        navigate('/employee/viewapprov');
+      }
+    } else {
+      const bankDetailData = {
+        ...data,
+        employee_id,
+        userId: user?.id
+      };
+      result = await createBankDetail(bankDetailData);
+      if (result) {
+        toast.success('Bank details added successfully!');
+        navigate('/employee/viewapprov');
+      }
     }
-  };
+  } catch (error) {
+    toast.error(`Error ${isEditMode ? 'updating' : 'adding'} bank details: ${error.message}`);
+  }
+};
+
 
   const handleCancel = () => {
     navigate('/employee/viewapprov');

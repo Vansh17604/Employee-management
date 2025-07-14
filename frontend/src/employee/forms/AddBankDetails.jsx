@@ -160,25 +160,7 @@ const AddBankDetailForm = ({ onNext, onCancel, initialData, disabled }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Bank Account Number */}
-        <div>
-          <label htmlFor="bank_acc_no" className="block text-sm font-medium text-gray-700 mb-1">
-            Bank Account Number *
-          </label>
-          <input
-            type="text"
-            id="bank_acc_no"
-            name="bank_acc_no"
-            value={formData.bank_acc_no}
-            onChange={handleInputChange}
-            disabled={disabled}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.bank_acc_no ? 'border-red-500' : 'border-gray-300'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            placeholder="Enter bank account number"
-          />
-          {errors.bank_acc_no && <p className="mt-1 text-sm text-red-500">{errors.bank_acc_no}</p>}
-        </div>
-
+        
         {/* Account Holder Name */}
         <div>
           <label htmlFor="bank_acc_name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -197,7 +179,25 @@ const AddBankDetailForm = ({ onNext, onCancel, initialData, disabled }) => {
             placeholder="Enter account holder name"
           />
           {errors.bank_acc_name && <p className="mt-1 text-sm text-red-500">{errors.bank_acc_name}</p>}
+        </div><div>
+          <label htmlFor="bank_acc_no" className="block text-sm font-medium text-gray-700 mb-1">
+            Bank Account Number *
+          </label>
+          <input
+            type="text"
+            id="bank_acc_no"
+            name="bank_acc_no"
+            value={formData.bank_acc_no}
+            onChange={handleInputChange}
+            disabled={disabled}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.bank_acc_no ? 'border-red-500' : 'border-gray-300'
+            } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            placeholder="Enter bank account number"
+          />
+          {errors.bank_acc_no && <p className="mt-1 text-sm text-red-500">{errors.bank_acc_no}</p>}
         </div>
+
 
         {/* Bank Selection */}
         <div>

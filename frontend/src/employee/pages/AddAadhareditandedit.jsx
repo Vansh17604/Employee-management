@@ -1,76 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import AddEmployeeForm from "../forms/AddEmployeeForm";
-import useEmployeeStore from '../../app/EmployeeStore';
+import { useNavigate, useParams } from 'react-router-dom';
+import AddAadharCardForm from '../forms/AddAadharCardForm';
+import useAadharStore from '../../app/aadharStore';
 import { toast } from 'sonner';
+import useAuthStore from '@/app/authStore';
+import { useLocation } from 'react-router-dom';
 
-const AddEmployeeandedit = () => {
+const AddAadhareditandedit = () => {
   const navigate = useNavigate();
+  const { employee_id, aadharId } = useParams();
+  const {user}= useAuthStore();
   const location = useLocation();
-  const { employeeId } = useParams();
-  const queryParams = new URLSearchParams(location.search);
-  const editType = queryParams.get("type");
+const queryParams = new URLSearchParams(location.search);
+const type = queryParams.get("type"); // could be "approve"
 
-  const {
-    createEmployee,
-    fetchApprovedEmployeeById,
-    fetchApprovedEmployeesByUserId, 
-    editPendingEmployee,
-    editApprovedEmployee,
-    currentEmployee,
-    loading: employeeLoading,
-    error: employeeError
-  } = useEmployeeStore();
+  const userId= user?.id;
+const { 
+  createAadhar, 
+  fetchAadharByItsOwnId,
+  fetchApprovedAadharById,
+  editPendingAadhar, 
+  editApprovedAadhar,
+  loading: aadharLoading, 
+  error: aadharError 
+} = useAadharStore();
 
+
+  const [initialData, setInitialData] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
   useEffect(() => {
-    if (employeeId) {
+    if (aadharId) {
       setIsEditMode(true);
-      fetchEmployeeData();
+      fetchAadharData();
     }
-  }, [employeeId, editType]);
+  }, [aadharId]);
+ 
 
-  const fetchEmployeeData = async () => {
-    setDataLoading(true);
-    try {
-      if (editType === 'approveemployeeedit') {
-        await fetchApprovedEmployeesByUserId(employeeId); 
+const fetchAadharData = async () => {
+  setDataLoading(true);
+  try {
+    let aadharData;
+
+    if (type === "approve") {
+      aadharData = await fetchApprovedAadharById(aadharId);
+    } else {
+      aadharData = await fetchAadharByItsOwnId(aadharId);
+    }
+
+    if (aadharData) {
+      setInitialData(aadharData);
+    }
+  } catch (error) {
+    console.error('Error fetching aadhar data:', error);
+  } finally {
+    setDataLoading(false);
+  }
+};
+
+
+const handleSubmit = async (data) => {
+  try {
+    let result;
+
+    if (isEditMode) {
+      if (type === "approve") {
+        result = await editApprovedAadhar(aadharId, data);
       } else {
-        await fetchApprovedEmployeeById(employeeId);
+        result = await editPendingAadhar(aadharId, data);
       }
-    } catch (error) {
-      console.error('Error fetching employee:', error);
-    } finally {
-      setDataLoading(false);
-    }
-  };
 
-  const handleNext = async (data) => {
-    try {
-      let result;
-
-      if (isEditMode) {
-        if (editType === 'approveemployeeedit') {
-          result = await editApprovedEmployee(employeeId, data);
-        } else {
-          result = await editPendingEmployee(employeeId, data);
-        }
-
-        if (result) {
-          navigate('/employee/viewemployee');
-        }
-      } else {
-        result = await createEmployee(data);
-        if (result) {
-          navigate('/employee/viewemployee');
-        }
+      if (result) {
+        toast.success('Aadhar card updated successfully!');
+        navigate('/employee/viewemployee');
       }
-    } catch (error) {
-      console.error('Error in form submission:', error);
+    } else {
+      const aadharData = {
+        ...data,
+        employee_id,
+        userId: user?.id
+      };
+      result = await createAadhar(aadharData);
+      if (result) {
+        toast.success('Aadhar card added successfully!');
+        navigate('/employee/viewemployee');
+      }
     }
-  };
+  } catch (error) {
+    toast.error(`Error ${isEditMode ? 'updating' : 'adding'} Aadhar card: ${error.message}`);
+  }
+};
+
 
   const handleCancel = () => {
     navigate('/employee/viewemployee');
@@ -84,9 +105,9 @@ const AddEmployeeandedit = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Employee Data...</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Aadhar Data...</h3>
                 <p className="text-sm text-gray-600">
-                  Please wait while we fetch the employee information.
+                  Please wait while we fetch the aadhar information.
                 </p>
               </div>
             </div>
@@ -101,30 +122,30 @@ const AddEmployeeandedit = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isEditMode ? 'Edit Employee' : 'Add New Employee'}
+            {isEditMode ? 'Edit Aadhar Card' : 'Add Aadhar Card'}
           </h1>
           <p className="text-gray-600">
-            {isEditMode ? 'Update the employee details below' : 'Fill in the employee details below'}
+            {isEditMode ? 'Update the aadhar card details below' : 'Fill in the aadhar card details below'}
           </p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6 relative">
-          <AddEmployeeForm
-            onNext={handleNext}
+          <AddAadharCardForm
+            onNext={handleSubmit}
             onCancel={handleCancel}
-            initialData={currentEmployee}
-            disabled={employeeLoading}
+            initialData={initialData}
+            disabled={aadharLoading}
           />
 
-          {employeeLoading && (
+          {aadharLoading && (
             <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {isEditMode ? 'Updating Employee...' : 'Saving Employee...'}
+                  {isEditMode ? 'Updating Aadhar Card...' : 'Saving Aadhar Card...'}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Please wait while we {isEditMode ? 'update' : 'save'} the employee information.
+                  Please wait while we {isEditMode ? 'update' : 'save'} the aadhar card information.
                 </p>
               </div>
             </div>
@@ -135,4 +156,4 @@ const AddEmployeeandedit = () => {
   );
 };
 
-export default AddEmployeeandedit;
+export default AddAadhareditandedit;

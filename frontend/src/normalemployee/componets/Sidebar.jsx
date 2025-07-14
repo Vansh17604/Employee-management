@@ -45,6 +45,11 @@ const useNav = () => {
       title:"View employee",
       path:"/normalemployee/viewapproveddata",
       icon:<User size={20} />
+    },{
+      type: "item",
+      title:"View Documents",
+      path:"/normalemployee/normalapproveddocument",
+      icon:<FileText size={20} />
     }
    
   ];

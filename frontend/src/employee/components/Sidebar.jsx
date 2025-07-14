@@ -22,6 +22,7 @@ import {
   Bell,
   CreditCard,
   CheckSquare,
+  File,
   Loader2
 } from 'lucide-react';
 
@@ -77,6 +78,32 @@ const useNav = () => {
         }
       ]
     },
+    {
+      type: "item",
+      title: "Add Document",
+      icon: <File size={20} />,
+      path: "/employee/adddocument"
+    },{
+      type:"group",
+      title:"View Document",
+      icon:<User size={20} />,
+      items:[
+        {
+          type: "item",
+          title: "Pending Document",
+          path: "/employee/viewpendingdocument"
+          },
+          {
+          type: "item",
+          title: "Rejected Document",
+          path: "/employee/viewrejectedocument"
+          },{
+          type: "item",
+          title: "Approved Document",
+          path: "/employee/viewapprovedocument"
+          }
+        ]
+    }
   ];
 
   return _nav;

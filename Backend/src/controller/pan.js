@@ -14,6 +14,7 @@ module.exports.createPan = [
         }
         try {
             const {
+                userId,
                 employee_id,
                 pan_no,
                 pan_name
@@ -21,6 +22,7 @@ module.exports.createPan = [
              const  pan_card=  req.file ? `/uploads/pancard/${req.file.filename}` : req.body.pan_card;
 
             const pan = new UpdatedPan({
+                userId,
                 employee_id,
                 pan_card,
                 pan_no,
@@ -52,7 +54,7 @@ module.exports.approvePan = async (req, res) => {
         }
 
         if (panToUpdate) {
-            // Update existing PAN record with correct field names
+            panToUpdate.userId=pendingPan.userId,
             panToUpdate.employee_id = pendingPan.employee_id;
             panToUpdate.pan_card = pendingPan.pan_card;
             panToUpdate.pan_name = pendingPan.pan_name;
@@ -68,6 +70,7 @@ module.exports.approvePan = async (req, res) => {
         } else {
             // Create new PAN record with correct field names
             panToUpdate = new Pan({
+                userId:pendingPan.userId,
                 employee_id: pendingPan.employee_id,
                 pan_card: pendingPan.pan_card,
                 pan_name: pendingPan.pan_name,
@@ -177,7 +180,7 @@ module.exports.editPanData = [
 
 module.exports.editApprovalPanData = [
     check('pan_card').not().isEmpty().withMessage('Pan Card is required'),
-    check('pan_no').isNumeric().withMessage('Pan card No is required'),
+    check('pan_no').not().isEmpty().withMessage('Pan card No is required'),
     check('pan_name').not().isEmpty().withMessage('Pan name is required'),
 
     async (req, res) => {
@@ -201,6 +204,7 @@ module.exports.editApprovalPanData = [
 
             
             const newPendingEntry = new UpdatedPan({
+              userId:approvedPan.userId,
                 employee_id: approvedPan.employee_id,
                 pan_card,
                 pan_name,
@@ -259,3 +263,212 @@ module.exports.fetchpanbyitsid=async(req,res)=>{
           res.status(500).json({ message: "Error fetching pan data", error: err.message});
     }
 }
+
+module.exports.getAllPendingPanByUserId = async (req, res) => {
+  try {
+    const pendingPans = await UpdatedPan.find({ status: "Pending", userId: req.params.id });
+    res.json({
+      message: "Pending PANs retrieved successfully",
+      pans: pendingPans
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error retrieving pending PANs", error: err.message });
+  }
+};
+module.exports.getAllApprovedPans = async (req, res) => {
+  try {
+    const approvedPans = await Pan.find({ status: "Approved" })
+      .populate('employee_id', 'name work_id')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      message: "Approved PANs retrieved successfully",
+      pans: approvedPans
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error retrieving approved PANs", error: err.message });
+  }
+};
+module.exports.getApprovedPanById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+ 
+    const  pan = await Pan.findById(id).populate('employee_id', 'name work_id');
+
+
+    if (!pan) {
+      return res.status(404).json({ message: "PAN not found" });
+    }
+
+    res.json({
+      message: "PAN retrieved successfully",
+      pan: pan
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error retrieving PAN", error: err.message });
+  }
+};
+
+module.exports.getPanByEmployeeId = async (req, res) => {
+  const { employee_id } = req.params;
+
+  try {
+    const approvedPans = await Pan.find({ 
+      employee_id: employee_id, 
+      status: "Approved" 
+    }).populate('employee_id', 'name work_id');
+
+    const pendingPans = await UpdatedPan.find({ 
+      employee_id: employee_id 
+    }).populate('employee_id', 'name work_id');
+
+    res.json({
+      message: "Employee PANs retrieved successfully",
+      approved: approvedPans,
+      pending: pendingPans
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error retrieving employee PANs", error: err.message });
+  }
+};
+
+module.exports.fetchPendingPanByUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const pan = await UpdatedPan.find({ userId: userId, status: "Pending" }).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({ message: "PAN fetched successfully", pan: pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+module.exports.fetchPanByItsId = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const pan = await UpdatedPan.findById(id).populate('employee_id');
+    res.status(200).json({ message: "PAN fetched successfully", pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+module.exports.fetchapprovPanByItsId = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const pan = await Pan.findById(id).populate('employee_id');
+    res.status(200).json({ message: "PAN fetched successfully", pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+module.exports.fetchRejectedPanByUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const pan = await UpdatedPan.find({ userId: userId, status: "Rejected" }).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({ message: "PAN fetched successfully", pan: pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+module.exports.fetchApprovedPanByUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const pan = await Pan.find({ userId: userId, status: "Approved" }).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({ message: "PAN fetched successfully", pan: pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+
+module.exports.fetchallPendingpans = async (req, res) => {
+  try {
+    const pendingPans = await UpdatedPan.find({ status: "Pending" })
+     .populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    })
+      .sort({ createdAt: -1 });
+
+    res.json({
+      message: "Pending PANs retrieved successfully",
+      pans: pendingPans
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error retrieving pending PANs", error: err.message });
+  }
+};
+module.exports.deletePan = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const pan = await UpdatedPan.findById(id);
+ 
+    await UpdatedPan.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'pan record deleted successfully',
+    });
+  } catch (err) {
+    console.error('Delete pan Error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while deleting Pan record',
+      error: err.message,
+    });
+  }
+};
+module.exports.fetchAllRejectedPan = async (req, res) => {
+  try {
+    const pan = await UpdatedPan.find({ status: "Rejected" }).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({ message: "PAN fetched successfully", pan: pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};
+module.exports.fetchAllApprovedPan = async (req, res) => {
+  try {
+    const pan = await Pan.find({ status: "Approved" }).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({ message: "PAN fetched successfully", pan: pan });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching PAN", error: err.message });
+  }
+};

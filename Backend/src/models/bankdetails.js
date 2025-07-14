@@ -7,6 +7,11 @@ const bankSchema = new Schema(
       ref: "Employee",
       required: true,
     },
+     userId:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
     bank_acc_no: {
       type: Number,
       required: true,
@@ -31,6 +36,11 @@ const bankSchema = new Schema(
     passbook_image: {
       type: String,
       required: true,
+    },
+      status: {
+      type: String,
+      
+      default: "pending",
     },
     updatedBankData:[
       {

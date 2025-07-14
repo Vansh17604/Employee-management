@@ -19,6 +19,7 @@ module.exports.createBankDetail = [
     try {
       const {
         employee_id,
+        userId,
         bank_acc_no,
         bank_acc_name,
         bank_id,
@@ -30,6 +31,7 @@ module.exports.createBankDetail = [
 
       const bankDetail = new UpdatedBankDetail({
         employee_id,
+        userId,
         bank_acc_no,
         bank_acc_name,
         bank_id,
@@ -66,6 +68,7 @@ module.exports.approveBankDetail = async (req, res) => {
 
     if (bankDetailToUpdate) {
       // Update existing bank detail
+      bankDetailToUpdate.userId=pendingBankDetail.userId;
       bankDetailToUpdate.employee_id = pendingBankDetail.employee_id;
       bankDetailToUpdate.bank_acc_no = pendingBankDetail.bank_acc_no;
       bankDetailToUpdate.bank_acc_name = pendingBankDetail.bank_acc_name;
@@ -74,15 +77,16 @@ module.exports.approveBankDetail = async (req, res) => {
       bankDetailToUpdate.ifsc_code = pendingBankDetail.ifsc_code;
       bankDetailToUpdate.passbook_image = pendingBankDetail.passbook_image;
 
-      // Remove the pending entry from updatedBankData
+      
       bankDetailToUpdate.updatedBankData = (bankDetailToUpdate.updatedBankData || []).filter(
         entry => entry.id.toString() !== pendingBankDetail._id.toString()
       );
 
       await bankDetailToUpdate.save();
     } else {
-      // Create new bank detail
+      
       bankDetailToUpdate = new BankDetail({
+        userId:pendingBankDetail.userId,
         employee_id: pendingBankDetail.employee_id,
         bank_acc_no: pendingBankDetail.bank_acc_no,
         bank_acc_name: pendingBankDetail.bank_acc_name,
@@ -232,6 +236,7 @@ module.exports.editApprovalBankDetailData = [
 
    
       const newPendingEntry = new UpdatedBankDetail({
+        userId: approvedBankDetail.userId,
         employee_id: approvedBankDetail.employee_id,
         bank_acc_no,
         bank_acc_name,
@@ -377,28 +382,7 @@ module.exports.getAllRejectedBankDetails = async (req, res) => {
   }
 };
 
-module.exports.deleteBankDetail = async (req, res) => {
-  const { id } = req.params;
 
-  try {
-    let deletedBankDetail = await UpdatedBankDetail.findByIdAndDelete(id);
-
-    if (!deletedBankDetail) {
-      deletedBankDetail = await BankDetail.findByIdAndDelete(id);
-    }
-
-    if (!deletedBankDetail) {
-      return res.status(404).json({ message: "Bank detail not found" });
-    }
-
-    res.json({
-      message: "Bank detail deleted successfully",
-      bankDetail: deletedBankDetail
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting bank detail", error: err.message });
-  }
-};
 
 
 module.exports.fetchbankdetailbyemployeid= async(req,res)=>{
@@ -417,4 +401,127 @@ module.exports.fetchbankdetailsbyitid= async(req,res)=>{
   }catch(err){
      res.status(500).json({message:"Error retrieving bank details",error:err.message})
   }
+}
+module.exports.fetchapprovbankdetailsbyitid= async(req,res)=>{
+  try{
+    const bankdetail= await BankDetail.findById(req.params.id).populate('bank_id employee_id');
+    res.json({bankdetail});
+  }catch(err){
+     res.status(500).json({message:"Error retrieving bank details",error:err.message})
+  }
+}
+module.exports.fetchallpendingbankdetailsbyuserid= async(req,res)=>{
+  try{
+    const userId= req.params.id
+    const bankdetail= await UpdatedBankDetail.find({userId:userId,status:"Pending"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+    res.json({message:"Bank details retrieved successfully",bankdetail:bankdetail})
+    }catch(err){
+      res.status(500).json({message:"Error retrieving bank details",error:err.message})
+      }
+}
+
+    module.exports.fetchAllPendingBankDetails = async(req,res)=>{
+      try{
+        const bankdetails= await UpdatedBankDetail.find({status:"Pending"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+        res.json({message:"bankdetails fetched successfully",bankdetails:bankdetails});
+        }catch(err){
+          res.status(500).json({message:"error fetching bankdetails",error:err.message});
+          }
+    }
+   module.exports.deleteBankDetails = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const BankDetails = await UpdatedBankDetail.findById(id);
+ 
+    await UpdatedBankDetail.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'BankDetails record deleted successfully',
+    });
+  } catch (err) {
+    console.error('Delete BankDetails Error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while deleting BankDetails record',
+      error: err.message,
+    });
+  }
+};
+module.exports.fetchAllRejecedBankDetails = async(req,res)=>{
+      try{
+        const bankdetails= await UpdatedBankDetail.find({status:"Rejected"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+        res.json({message:"bankdetails fetched successfully",bankdetails:bankdetails});
+        }catch(err){
+          res.status(500).json({message:"error fetching bankdetails",error:err.message});
+          }
+    }
+  module.exports.fetchAllApprovedBankDetails = async(req,res)=>{
+      try{
+        const bankdetails= await BankDetail.find({status:"Approved"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+        res.json({message:"bankdetails fetched successfully",bankdetails:bankdetails});
+        }catch(err){
+          res.status(500).json({message:"error fetching bankdetails",error:err.message});
+          }
+    }
+    module.exports.fetchallRejectedbankdetailsbyuserid= async(req,res)=>{
+  try{
+    const userId= req.params.id
+    const bankdetail= await UpdatedBankDetail.find({userId:userId,status:"Rejected"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+    res.json({message:"Bank details retrieved successfully",bankdetail:bankdetail})
+    }catch(err){
+      res.status(500).json({message:"Error retrieving bank details",error:err.message})
+      }
+}
+module.exports.fetchallApprovedbankdetailsbyuserid= async(req,res)=>{
+  try{
+    const userId= req.params.id
+    const bankdetail= await BankDetail.find({userId:userId,status:"Approved"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    }).populate('bank_id');
+    res.json({message:"Bank details retrieved successfully",bankdetail:bankdetail})
+    }catch(err){
+      res.status(500).json({message:"Error retrieving bank details",error:err.message})
+      }
 }

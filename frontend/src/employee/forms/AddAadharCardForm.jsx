@@ -71,9 +71,7 @@ const AddAadharCardForm = ({ onNext, onCancel, initialData, disabled }) => {
       newErrors.aadhar_no = 'Aadhar number is required';
     } else if (!/^\d+$/.test(formData.aadhar_no)) {
       newErrors.aadhar_no = 'Aadhar number must be numeric';
-    } else if (formData.aadhar_no.length !== 12) {
-      newErrors.aadhar_no = 'Aadhar number must be 12 digits';
-    }
+    } 
 
     // Only require photo for new aadhar cards
     if (!isEditMode && !formData.aadhar_card) {

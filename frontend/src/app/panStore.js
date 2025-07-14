@@ -44,7 +44,7 @@ const usePanStore = create((set) => ({
   approvePan: async (id) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post(`${base_url}/approvepan/${id}`, {}, config);
+      const res = await axios.post(`${base_url}/approvpan/${id}`, {}, config);
       const { pan } = res.data;
 
       set((state) => ({
@@ -167,6 +167,165 @@ fetchPanById: async (id) => {
     return false;
   }
 },
+fetchPendingPanByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchpendingbyuserid/${userId}`, config);
+    const { pan } = res.data;
+
+    set({
+      pendingPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching pending PAN by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},fetchAllPendingPans: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallpendingpan`, config); // use `all` or any ID if required
+    const { pans } = res.data;
+
+    set({
+      pendingPans: pans,
+      loading: false,
+      error: null
+    });
+
+    return pans;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching all pending PANs';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},fetchApprovedPanById: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovedpanbyid/${id}`, config);
+    const { pan } = res.data;
+
+    set({ loading: false });
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved PAN by ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+fetchAllApprovedPans: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallapproved`, config);
+    const { pan } = res.data;
+
+    set({
+      approvedPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved PANs';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+fetchAllRejectedPans: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallrejected`, config);
+    const { pan } = res.data;
+
+    set({
+      rejectedPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching rejected PANs';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+fetchRejectedPanByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallrejectpanbyuserId/${userId}`, config);
+    const { pan } = res.data;
+
+    set({
+      rejectedPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching rejected PAN by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+fetchApprovedPanByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallapprovedpanbyuserId/${userId}`, config);
+    const { pan } = res.data;
+
+    set({
+      approvedPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved PAN by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+
+deletePan: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    await axios.delete(`${base_url}/deletepan/${id}`, config);
+
+    set((state) => ({
+      pendingPans: state.pendingPans.filter(p => p._id !== id),
+      loading: false,
+      error: null
+    }));
+
+    toast.success("PAN deleted successfully");
+    return true;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error deleting PAN';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+
 
 
   clearError: () => {

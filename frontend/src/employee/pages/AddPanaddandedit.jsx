@@ -3,17 +3,28 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AddPanCardForm from '../forms/AddPanForm';
 import usePanStore from '../../app/panStore';
 import { toast } from 'sonner';
+import useAuthStore from '@/app/authStore';
+import { useLocation } from 'react-router-dom';
+
 
 const AddPanaddandedit = () => {
   const navigate = useNavigate();
   const { employee_id, panId } = useParams();
+  const {user}=useAuthStore();
+  const location = useLocation();
+const queryParams = new URLSearchParams(location.search);
+const type = queryParams.get("type"); // 'approve' or null
+
   const { 
-    createPan, 
-    fetchPanById, 
-    editPendingPan, 
-    loading: panLoading, 
-    error: panError 
-  } = usePanStore();
+  createPan, 
+  fetchPanById, 
+  fetchApprovedPanById,
+  editPendingPan, 
+  editApprovedPan,
+  loading: panLoading, 
+  error: panError 
+} = usePanStore();
+
 
   const [initialData, setInitialData] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -26,48 +37,56 @@ const AddPanaddandedit = () => {
     }
   }, [panId]);
 
-  const fetchPanData = async () => {
-    setDataLoading(true);
-    try {
-      const panData = await fetchPanById(panId);
-     
-      if (panData) {
-        setInitialData(panData);
-      }
-    } catch (error) {
-      console.error('Error fetching PAN data:', error);
-    } finally {
-      setDataLoading(false);
-    }
-  };
+ const fetchPanData = async () => {
+  setDataLoading(true);
+  try {
+    const panData = type === "approve"
+      ? await fetchApprovedPanById(panId)
+      : await fetchPanById(panId);
 
-  const handleSubmit = async (data) => {
-    try {
-      let result;
-      
-      if (isEditMode) {
-        
-        result = await editPendingPan(panId, data);
-        if (result) {
-          toast.success('PAN card updated successfully!');
-          navigate('/employee/viewapprov');
-        }
-      } else {
-        // Create new PAN
-        const panData = {
-          ...data,
-          employee_id,
-        };
-        result = await createPan(panData);
-        if (result) {
-          toast.success('PAN card added successfully!');
-          navigate('/employee/viewapprov');
-        }
-      }
-    } catch (error) {
-      toast.error(`Error ${isEditMode ? 'updating' : 'adding'} PAN card: ${error.message}`);
+    if (panData) {
+      setInitialData(panData);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching PAN data:', error);
+  } finally {
+    setDataLoading(false);
+  }
+};
+
+
+const handleSubmit = async (data) => {
+  try {
+    let result;
+
+    if (isEditMode) {
+      if (type === "approve") {
+        result = await editApprovedPan(panId, data);
+      } else {
+        result = await editPendingPan(panId, data);
+      }
+
+      if (result) {
+        toast.success('PAN card updated successfully!');
+        navigate('/employee/viewapprov');
+      }
+    } else {
+      const panData = {
+        ...data,
+        employee_id,
+        userId: user?.id
+      };
+      result = await createPan(panData);
+      if (result) {
+        toast.success('PAN card added successfully!');
+        navigate('/employee/viewapprov');
+      }
+    }
+  } catch (error) {
+    toast.error(`Error ${isEditMode ? 'updating' : 'adding'} PAN card: ${error.message}`);
+  }
+};
+
 
   const handleCancel = () => {
     navigate('/employee/viewapprov');

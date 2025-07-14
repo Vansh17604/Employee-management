@@ -167,7 +167,163 @@ const useBankdetailStore = create((set) => ({
       toast.error(errorMessage);
       return false;
     }
-  },
+  },fetchPendingBankDetailsByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchpendingbankdetailsbyuserid/${userId}`, config);
+    const { bankdetail } = res.data;
+
+    set({
+      pendingBankDetails: bankdetail,
+      loading: false,
+      error: null
+    });
+
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching pending bank details by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},deleteBankDetail: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    await axios.delete(`${base_url}/deletebankdetails/${id}`, config);
+
+    set((state) => ({
+      pendingBankDetails: state.pendingBankDetails.filter(b => b._id !== id),
+      loading: false,
+      error: null
+    }));
+
+    toast.success("Bank detail deleted successfully");
+    return true;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error deleting bank detail';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},fetchAllPendingBankDetails: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallpendingbankdetails`, config);
+    const { bankdetails } = res.data;
+
+    set({
+      pendingBankDetails: bankdetails,
+      loading: false,
+      error: null
+    });
+
+    return bankdetails;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching all pending bank details';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},fetchAllApprovedBankDetails: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovbankdetails`, config);
+    const { bankdetails } = res.data;
+
+    set({
+      approvedBankDetails: bankdetails,
+      loading: false,
+      error: null
+    });
+
+    return bankdetails;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved bank details';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+fetchApprovedBankDetailById: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovedbankdetailbyid/${id}`, config);
+    const { bankdetail } = res.data;
+
+    set({ loading: false });
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved bank detail by ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+
+fetchAllRejectedBankDetails: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallrejectedbankdetails`, config);
+    const { bankdetails } = res.data;
+
+    set({
+      rejectedBankDetails: bankdetails,
+      loading: false,
+      error: null
+    });
+
+    return bankdetails;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching rejected bank details';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},fetchRejectedBankDetailsByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallrejectedbankdetailsbyuserid/${userId}`, config);
+    const { bankdetail } = res.data;
+
+    set({
+      rejectedBankDetails: bankdetail,
+      loading: false,
+      error: null
+    });
+
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching rejected bank details by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+fetchApprovedBankDetailsByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallapprovedbankdetailvyuserid/${userId}`, config);
+    const { bankdetail } = res.data;
+
+    set({
+      approvedBankDetails: bankdetail,
+      loading: false,
+      error: null
+    });
+
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved bank details by user ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
+
+
 
   clearError: () => {
     set({ error: null });

@@ -8,6 +8,11 @@ const updatedBankSchema = new Schema(
       ref: "Employee",
       required: true,
     },
+     userId:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
     bank_acc_no: {
       type: Number,
       required: true,

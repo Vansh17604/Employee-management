@@ -22,7 +22,8 @@ import {
   TrendingUp,
   Loader2,
   X,
-  Menu
+  Menu,
+  File
 } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
@@ -105,10 +106,35 @@ const useNav = () => {
         },{
           type: "item",
           title: "View Approved Employee",
+          
           path: "/admin/viewapprovedemployee"
         }
         
       ]
+    },
+    {
+      type:'group',
+      title:"View Documents",
+      icon: <File size={20} />,
+      items:[
+         
+        {
+          type: "item",
+          title: "View Pending Documents",
+          path: "/admin/viewpendingdoc",
+
+        },{
+ type: "item",
+          title: "View Rejected Documents",
+          path: "/admin/rejectedDocs",
+        },{
+ type: "item",
+          title: "View Approved Documents",
+          path: "/admin/approvedDocs",
+        },
+
+      ]
+
     }
   ];
 

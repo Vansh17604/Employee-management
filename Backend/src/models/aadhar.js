@@ -6,6 +6,12 @@ const aadharSchema = new Schema({
         ref:'Employee',
         required:true
     },
+      userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        required:'true'
+    
+      },
   aadhar_card: {
     type: String,
     required: true,

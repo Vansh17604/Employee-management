@@ -7,6 +7,11 @@ const panSchema = new Schema(
       ref: "Employee",
       required: true,
     },
+    userId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     pan_card: {
       type: String,
       required: true,

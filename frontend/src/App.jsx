@@ -29,6 +29,25 @@ import ViewApprovalEmployees from './employee/pages/ViewApprovalEmployees';
 import ViewAprovweddata from './normalemployee/pages/ViewAprovweddata';
 import AdminEmployeeView from './admin/pages/AdminEmployeeView';
 import NormalEmployeeView from './normalemployee/pages/NormalEmployeeView';
+import AddDocument from './employee/pages/AddDocument';
+import ViewPendingDocuments from './employee/pages/ViewPendingDocuments';
+import ViewAadhar from './employee/pages/ViewAadhar';
+import ViewPan from './employee/pages/ViewPan';
+import ViewBankDetail from './employee/pages/ViewBankDetails';
+import ViewEmployeePendingDocuments from './admin/pages/ViewPendingDocuments';
+import AdminAadharview from './admin/pages/AdminAadharview';
+import AdminPanview from './admin/pages/AdminPanview';
+import AdminBankdetailview from './admin/pages/AdminBankdetailview';
+import AdminRejectedDocuments from './admin/pages/RejectedDocument';
+import AdminApprovedDocuments from './admin/pages/ApprovedDocument';
+import ViewApprovedDocuments from './employee/pages/ViewApprovedDocument';
+import ViewRejectedDocuments from './employee/pages/ViewRejectedDocument';
+import NormalViewApprovedDocument from './normalemployee/pages/normalViewApprovedDocument';
+import NormalAadhar from './normalemployee/pages/NormalAadhar';
+import NormalPan from './normalemployee/pages/NormalPan';
+import NormalBankDetail from './normalemployee/pages/NormalBankdetails';
+
+
 
 const PrivateRoute = ({ children, roles }) => {
   const { user, role, isLoading } = useAuthStore();
@@ -116,6 +135,12 @@ function App() {
              <Route path='profile' element={<AdminProfile/>}/>
              <Route path='changepassword' element={<ChangePassword/>} />
              <Route path='adminemployeeview/:employeeId' element={<AdminEmployeeView/>}/>
+             <Route path='viewpendingdoc' element={<ViewEmployeePendingDocuments/>}/>
+             <Route path='adminaddhar/:id' element={<AdminAadharview/>}/>
+             <Route path='adminpan/:id' element={<AdminPanview/>}/>
+             <Route path='adminbankdetails/:id' element={<AdminBankdetailview/>}/>
+             <Route path='rejectedDocs' element={<AdminRejectedDocuments/>} />
+             <Route path='approvedDocs' element={<AdminApprovedDocuments/>}/>
             </Route>
              <Route
             path="/employee/*"
@@ -140,6 +165,14 @@ function App() {
              <Route path='employeedetails/:employeeId' element={<EmployeeDetailsView/>}/> 
              <Route path='viewreject' element={<ViewRejectedEmployees/>}/>
              <Route path='viewapprov' element={<ViewApprovalEmployees/>}/>
+             <Route path='adddocument' element={<AddDocument/>} />
+             <Route path='viewpendingdocument' element={<ViewPendingDocuments/>} />
+             <Route path='viewaadhar/:id' element={<ViewAadhar/>}/>
+             <Route path='viewpan/:id' element={<ViewPan/>}/>
+             <Route path='viewbankdetails/:id' element={<ViewBankDetail/>}/>
+             <Route path='viewrejectedocument' element={<ViewRejectedDocuments/>}/>
+             <Route path='viewapprovedocument' element={<ViewApprovedDocuments/>}/>
+
             </Route>
                <Route
             path="/normalemployee/*"
@@ -153,6 +186,10 @@ function App() {
             <Route index element={<NormalEmployeeDashboard />} />
             <Route path='viewapproveddata' element={<ViewAprovweddata/>}/>
             <Route path='normalemployeeview/:employeeId' element={<NormalEmployeeView/>}/>
+            <Route path='normalapproveddocument' element={<NormalViewApprovedDocument/>}/>
+            <Route path='normalaadhar/:id'  element={<NormalAadhar/>}/>
+            <Route path='normalpan/:id'  element={<NormalPan/>}/>
+            <Route path='normalbankdetails/:id'  element={<NormalBankDetail/>}/>
             </Route>
 
           

@@ -158,14 +158,173 @@ fetchAadharByItsOwnId: async (id) => {
     const { aadhar } = res.data;
 
     set({ loading: false });
-    return aadhar; // This will be used to set form data outside
+    return aadhar; 
   } catch (err) {
     const msg = err.response?.data?.message || 'Error fetching Aadhar by ID';
     set({ error: msg, loading: false });
     toast.error(msg);
     return false;
   }
+},fetchPendingAadharByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchpendingaadharbyuserid/${userId}`, config);
+    const { aadhar } = res.data;
+
+    set({
+      pendingAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching pending Aadhar by user ID';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},fetchRejectedAadharByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchrejectedaadharbyuserid/${userId}`, config);
+    const { aadhar } = res.data;
+
+    set({
+      rejectedAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching rejected Aadhar by user ID';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
 },
+
+fetchApprovedAadharByUserId: async (userId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchaprovedaadharbyuserid/${userId}`, config);
+    const { aadhar } = res.data;
+
+    set({
+      approvedAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching approved Aadhar by user ID';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+deleteAadhar: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    await axios.delete(`${base_url}/deleteaadhar/${id}`, config);
+
+    set((state) => ({
+      pendingAadhars: state.pendingAadhars.filter(aadhar => aadhar._id !== id),
+      loading: false,
+      error: null
+    }));
+
+    toast.success("Aadhar deleted successfully");
+    return true;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error deleting aadhar';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+fetchAllPendingAadhar: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchallpendingaadhar`, config);
+    const { aadhar } = res.data;
+
+    set({
+      pendingAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching all pending Aadhar';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+fetchAllApprovedAadhar: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovedaadhar`, config);
+    const { aadhar } = res.data;
+
+    set({
+      approvedAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching approved Aadhar';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+
+fetchAllRejectedAadhar: async () => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchrejectedaadhar`, config);
+    const { aadhar } = res.data;
+
+    set({
+      rejectedAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching rejected Aadhar';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+fetchApprovedAadharById: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovaadharbyid/${id}`, config);
+    const { aadhar } = res.data;
+
+    set({ loading: false });
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching approved Aadhar by ID';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+
+
+
+
 
 
   clearError: () => {

@@ -17,6 +17,7 @@ module.exports.createAadhar = [
 
     try {
       const {
+        userId,
         employee_id,
         aadhar_name,
         aadhar_no
@@ -36,6 +37,7 @@ module.exports.createAadhar = [
         aadhar_card,
         aadhar_name,
         aadhar_no,
+        userId,
         status: "Pending"
       });
 
@@ -66,6 +68,7 @@ module.exports.approveAadhar = async (req, res) => {
     if (aadharToUpdate) {
 
       aadharToUpdate.employee_id = pendingAadhar.employee_id;
+      aadharToUpdate.userId=pendingAadhar.userId;
       aadharToUpdate.aadhar_card = pendingAadhar.aadhar_card;
       aadharToUpdate.aadhar_name = pendingAadhar.aadhar_name;
       aadharToUpdate.aadhar_no = pendingAadhar.aadhar_no;
@@ -80,6 +83,7 @@ module.exports.approveAadhar = async (req, res) => {
       
       aadharToUpdate = new Aadhar({
         employee_id: pendingAadhar.employee_id,
+        userId: pendingAadhar.userId,
         aadhar_card: pendingAadhar.aadhar_card,
         aadhar_name: pendingAadhar.aadhar_name,
         aadhar_no: pendingAadhar.aadhar_no,
@@ -212,6 +216,7 @@ module.exports.editApprovalAadharData = [
 
       
       const newPendingEntry = new UpdatedAadhar({
+        userId:approvedAadhar.userId,
          employee_id: approvedAadhar.employee_id,
         aadhar_card,
         aadhar_name,
@@ -296,15 +301,13 @@ module.exports.getAllApprovedAadhars = async (req, res) => {
   }
 };
 
-module.exports.getAadharById = async (req, res) => {
+module.exports.getApprovedAadharById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    let aadhar = await UpdatedAadhar.findById(id).populate('employee_id', 'name work_id');
-    
-    if (!aadhar) {
-      aadhar = await Aadhar.findById(id).populate('employee_id', 'name work_id');
-    }
+   
+    const  aadhar = await Aadhar.findById(id).populate('employee_id', 'name work_id');
+
 
     if (!aadhar) {
       return res.status(404).json({ message: "Aadhar not found" });
@@ -361,3 +364,133 @@ module.exports.fetchaadharbyitsid= async(req,res)=>{
     res.status(500).json({message:"error fetching aadhar",error:err.message});
   }
 }
+module.exports.fetchaprovaadharbyitsid= async(req,res)=>{
+  const id= req.params.id;
+  try{
+    const aadhar= await Aadhar.findById(id).populate('employee_id');
+   res.status(200).json({ message: "Aadhar fetched successfully", aadhar });
+    
+  }catch(err){
+    res.status(500).json({message:"error fetching aadhar",error:err.message});
+  }
+}
+
+
+module.exports.fetchpendingaadharbyuserId= async(req,res)=>{
+  const userId=req.params.id;
+  try{
+    const aadhar= await UpdatedAadhar.find({userId:userId,status:"Pending"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+    res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+    }catch(err){
+      res.status(500).json({message:"error fetching aadhar",error:err.message});
+      }
+}
+
+    module.exports.fetchrejectedaadharbyuserId= async(req,res)=>{
+      const userId=req.params.id;
+      try{
+        const aadhar= await UpdatedAadhar.find({userId:userId,status:"Rejected"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+        res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+        }catch(err){
+          res.status(500).json({message:"error fetching aadhar",error:err.message});
+        }
+    }
+
+    module.exports.fetchApprovedaadharbyuserId= async(req,res)=>{
+    const userId= req.params.id;
+    try{
+      const aadhar= await Aadhar.find({userId:userId,status:"Approved"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+      res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+
+    }catch(err){
+      res.status(500).json({message:"error fetching aadhar",error:err.message});
+    }
+    }
+
+    module.exports.fetchAllPendingAadhar = async(req,res)=>{
+      try{
+        const aadhar= await UpdatedAadhar.find({status:"Pending"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+        res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+        }catch(err){
+          res.status(500).json({message:"error fetching aadhar",error:err.message});
+          }
+    }
+   module.exports.deleteAadhar = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const aadhar = await UpdatedAadhar.findById(id);
+ 
+    await UpdatedAadhar.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Aadhaar record deleted successfully',
+    });
+  } catch (err) {
+    console.error('Delete Aadhaar Error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while deleting Aadhaar record',
+      error: err.message,
+    });
+  }
+};
+    module.exports.fetchAllRejectedAadhar= async(req,res)=>{
+      try{
+        const aadhar= await UpdatedAadhar.find({status:"Rejected"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+        res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+        }catch(err){
+          res.status(500).json({message:"error fetching aadhar",error:err.message});
+          }
+    }
+    module.exports.fetchAllApprovedAadhar= async(req,res)=>{
+      try{
+        const aadhar= await Aadhar.find({status:"Approved"}).populate({
+      path: 'employee_id',
+      select: 'name photo perment_address work_id employeeId',
+      populate: {
+        path: 'work_id',
+        select: 'work_place_name'
+      }
+    });
+        res.json({message:"aadhar fetched successfully", aadhar:aadhar});
+        }catch(err){
+          res.status(500).json({message:"error fetching aadhar",error:err.message});
+        }
+    }

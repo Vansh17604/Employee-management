@@ -23,7 +23,7 @@ const useAuthStore = create((set) => ({
         loading: false,
         error: null
       });
-toast.success("Login successful");
+toast.success("Login successful",{dismissible: true});
      
       return true;
        

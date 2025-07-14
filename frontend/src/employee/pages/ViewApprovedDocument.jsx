@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Search, CreditCard, Building, IdCard, Edit, Eye } from "lucide-react";
+import { FileText, Search, CreditCard, Building, Edit, Eye } from "lucide-react";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import gif from '/assets/Animation - 1747722366024.gif';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import usePanStore from '../../app/panStore';
 import useBankdetailStore from '../../app/bankdetailStore';
 import useAuthStore from '../../app/authStore';
 
-export default function ViewPendingDocuments() {
+export default function ViewApprovedDocuments() {
   const [activeTab, setActiveTab] = useState("aadhar");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
@@ -20,8 +20,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: aadharLoading, 
     error: aadharError, 
-    pendingAadhars, 
-    fetchPendingAadharByUserId,
+    approvedAadhars, 
+    fetchApprovedAadharByUserId,
     clearError: clearAadharError 
   } = useAadharStore();
 
@@ -29,8 +29,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: panLoading, 
     error: panError, 
-    pendingPans, 
-    fetchPendingPanByUserId,
+    approvedPans, 
+    fetchApprovedPanByUserId,
     clearError: clearPanError 
   } = usePanStore();
 
@@ -38,8 +38,8 @@ export default function ViewPendingDocuments() {
   const { 
     loading: bankLoading, 
     error: bankError, 
-    pendingBankDetails, 
-    fetchPendingBankDetailsByUserId,
+    approvedBankDetails, 
+    fetchApprovedBankDetailsByUserId,
     clearError: clearBankError 
   } = useBankdetailStore();
 
@@ -53,12 +53,12 @@ export default function ViewPendingDocuments() {
     clearBankError();
       
     if (user && user?.id) {
-      console.log("Fetching documents for user ID:", user.id);
-      fetchPendingAadharByUserId(user?.id);
-      fetchPendingPanByUserId(user?.id);
-      fetchPendingBankDetailsByUserId(user?.id);
+      console.log("Fetching approved documents for user ID:", user.id);
+      fetchApprovedAadharByUserId(user?.id);
+      fetchApprovedPanByUserId(user?.id);
+      fetchApprovedBankDetailsByUserId(user?.id);
     }
-  }, [clearAadharError, clearPanError, clearBankError, fetchPendingAadharByUserId, fetchPendingPanByUserId, fetchPendingBankDetailsByUserId, user]);
+  }, [clearAadharError, clearPanError, clearBankError, fetchApprovedAadharByUserId, fetchApprovedPanByUserId, fetchApprovedBankDetailsByUserId, user]);
 
   useEffect(() => {
     if (aadharError) {
@@ -99,13 +99,13 @@ export default function ViewPendingDocuments() {
       
       switch (activeTab) {
         case 'aadhar':
-          navigate(`/employee/addaddharedit/${employeeId}/${item._id}`);
+          navigate(`/employee/addaddharedit/${employeeId}/${item._id}?type=approve`);
           break;
         case 'pan':
-          navigate(`/employee/addpanaddandedit/${employeeId}/${item._id}`);
+          navigate(`/employee/addpanaddandedit/${employeeId}/${item._id}?type=approve`);
           break;
         case 'bank':
-          navigate(`/employee/addbankdetailandedit/${employeeId}/${item._id}`);
+          navigate(`/employee/addbankdetailandedit/${employeeId}/${item._id}?type=approve`);
           break;
         default:
           break;
@@ -117,13 +117,13 @@ export default function ViewPendingDocuments() {
     if (item && item._id) {
       switch (activeTab) {
         case 'aadhar':
-          navigate(`/employee/viewaadhar/${item._id}`);
+          navigate(`/employee/viewaadhar/${item._id}?type=Aprov`);
           break;
         case 'pan':
-          navigate(`/employee/viewpan/${item._id}`);
+          navigate(`/employee/viewpan/${item._id}?type=Aprov`);
           break;
         case 'bank':
-          navigate(`/employee/viewbankdetails/${item._id}`);
+          navigate(`/employee/viewbankdetails/${item._id}?type=Aprov`);
           break;
         default:
           break;
@@ -134,11 +134,11 @@ export default function ViewPendingDocuments() {
   const getCurrentData = () => {
     switch (activeTab) {
       case 'aadhar':
-        return pendingAadhars || [];
+        return approvedAadhars || [];
       case 'pan':
-        return pendingPans || [];
+        return approvedPans || [];
       case 'bank':
-        return pendingBankDetails || [];
+        return approvedBankDetails || [];
       default:
         return [];
     }
@@ -298,8 +298,8 @@ export default function ViewPendingDocuments() {
     if (filteredData.length === 0) {
       return (
         <tr>
-          <td colSpan="10" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-            No pending {activeTab} documents found
+          <td colSpan="11" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+            No approved {activeTab} documents found
           </td>
         </tr>
       );
@@ -350,27 +350,21 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  {item.status || 'Approved'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                   <Button
+                                      onClick={() => handleEdit(item)}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    >
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -427,27 +421,21 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  {item.status || 'Approved'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                   <Button
+                                      onClick={() => handleEdit(item)}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    >
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -519,27 +507,21 @@ export default function ViewPendingDocuments() {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  item.status?.toLowerCase() === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                    : item.status?.toLowerCase() === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}>
-                  {item.status || 'Pending'}
+                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  {item.status || 'Approved'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex space-x-2">
-                  <Button
-                    onClick={() => handleEdit(item)}
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                   <Button
+                                      onClick={() => handleEdit(item)}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    >
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
                   <Button
                     onClick={() => handleViewDetails(item)}
                     variant="outline"
@@ -559,8 +541,6 @@ export default function ViewPendingDocuments() {
     });
   };
 
-
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="flex-1 px-6 py-6 max-w-7xl w-full mx-auto">
@@ -572,7 +552,6 @@ export default function ViewPendingDocuments() {
           </Alert>
         )}
 
-        
         <div className="mb-6">
           <nav className="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
             {tabs.map((tab) => {
@@ -582,7 +561,7 @@ export default function ViewPendingDocuments() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                   }`}
                 >
@@ -598,7 +577,7 @@ export default function ViewPendingDocuments() {
         <div className="rounded-lg border shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-gray-800 dark:text-white">
-              All Pending {tabs.find(t => t.id === activeTab)?.label}
+              All Approved {tabs.find(t => t.id === activeTab)?.label}
             </h3>
           
             <div className="mt-4 flex flex-col lg:flex-row gap-4">
@@ -609,7 +588,7 @@ export default function ViewPendingDocuments() {
                   placeholder={`Search ${activeTab} documents...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -624,7 +603,7 @@ export default function ViewPendingDocuments() {
                   className="h-16 w-16"
                 />
                 <span className="ml-3 text-gray-600 dark:text-gray-400">
-                  Loading {activeTab} documents...
+                  Loading approved {activeTab} documents...
                 </span>
               </div>
             ) : (
