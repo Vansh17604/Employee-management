@@ -42,7 +42,7 @@ import AdminRejectedDocuments from './admin/pages/RejectedDocument';
 import AdminApprovedDocuments from './admin/pages/ApprovedDocument';
 import ViewApprovedDocuments from './employee/pages/ViewApprovedDocument';
 import ViewRejectedDocuments from './employee/pages/ViewRejectedDocument';
-import NormalViewApprovedDocument from './normalemployee/pages/normalViewApprovedDocument';
+import NormalViewApprovedDocument from './normalemployee/pages/NormalViewApprovedDocument';
 import NormalDocumentView from './normalemployee/pages/NormalDocumentView';
 import NormalPan from './normalemployee/pages/NormalPan';
 import NormalBankDetail from './normalemployee/pages/NormalBankdetails';
