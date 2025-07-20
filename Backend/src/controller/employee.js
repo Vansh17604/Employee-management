@@ -1,5 +1,11 @@
 const UpdateModel = require('../models/update');
 const Employee = require('../models/employee');
+const UpdatedAadhar = require('../models/updatedaadhar');
+const Aadhar = require('../models/aadhar');
+const Pan = require('../models/pan');
+const UpdatedPan = require('../models/updatedpan');
+const BankDetail= require('../models/bankdetails');
+const UpdatedBankDetail= require('../models/updatedbankdetails');
 const { check, validationResult } = require('express-validator');
 const getNextEmployeeId =require('../utils/getNextEmployeeId');
 
@@ -8,7 +14,15 @@ module.exports.createEmployee = [
   check('name').not().isEmpty().withMessage('Name is required'),
   check('perment_address').not().isEmpty().withMessage('Permanent address is required'),
   check('current_address').not().isEmpty().withMessage('Current address is required'),
-  check('primary_mno').isNumeric().withMessage('Primary mobile number must be numeric'),
+    check('primary_mno')
+    .isNumeric().withMessage('Primary mobile number must be numeric')
+    .custom(async (value) => {
+      const existing = await UpdateModel.findOne({ primary_mno: value });
+      if (existing) {
+        throw new Error('Primary mobile number already exists');
+      }
+      return true;
+    }),
   check('secondary_mno').isNumeric().withMessage('Secondary mobile number must be numeric'),
   check('home_mno').isNumeric().withMessage('Home mobile number must be numeric'),
   check('work_id').not().isEmpty().withMessage('Work ID is required'),
@@ -132,7 +146,7 @@ module.exports.approveEmployee = async (req, res) => {
     pendingEmployee.status = "Approved";
     await pendingEmployee.save();
 
-    await UpdateModel.findByIdAndDelete(id);
+    
 
     res.json({
       message: "Employee approved and updated successfully",
@@ -240,6 +254,9 @@ module.exports.editEmployeeData = [
 
 
 
+
+
+
 module.exports.editApprovalEmployeeData = [
   check('name').not().isEmpty().withMessage('Name is required'),
   check('perment_address').not().isEmpty().withMessage('Permanent address is required'),
@@ -268,70 +285,97 @@ module.exports.editApprovalEmployeeData = [
       secondary_mno,
       home_mno,
       work_id,
-      workstatus,
-
-    
+      workstatus
     } = req.body;
+
     const photo = req.file ? `/uploads/editupadated/${req.file.filename}` : req.body.photo;
 
-
     try {
+    
       const approvedEmployee = await Employee.findById(id);
       if (!approvedEmployee) {
         return res.status(404).json({ message: "Approved employee not found" });
       }
 
-     
-      const newPendingEntry = new UpdateModel({
-        name,
-        userId,
-        employeeId,
-        perment_address,
-        current_address,
-        primary_mno,
-        secondary_mno,
-        home_mno,
-        work_id,
-        photo,
-        workstatus: "Active",
-        status: "Pending"
-      });
+    
+      let pendingUpdate = await UpdateModel.findOne({ employeeId, status: 'Approved' });
 
-      
-      const existingEmployData = newPendingEntry.employData || [];
-      const isEmployeeAlreadyLinked = existingEmployData.some(e => e.id.toString() === id);
-      if (!isEmployeeAlreadyLinked) {
-        newPendingEntry.employData = [
-          ...(newPendingEntry.employData || []),
-          { id, date: new Date() }
-        ];
+      if (pendingUpdate) {
+        // Update existing pending record
+        pendingUpdate.set({
+          name,
+          userId,
+          employeeId,
+          perment_address,
+          current_address,
+          primary_mno,
+          secondary_mno,
+          home_mno,
+          work_id,
+          photo,
+          workstatus: "Active",
+          status: "Pending"
+        });
+
+        // Update employData reference if not already linked
+        const isLinked = pendingUpdate.employData?.some(e => e.id.toString() === id);
+        if (!isLinked) {
+          pendingUpdate.employData = [
+            ...(pendingUpdate.employData || []),
+            { id, date: new Date() }
+          ];
+        }
+
+        await pendingUpdate.save();
+      } else {
+        // Create new pending update
+        pendingUpdate = new UpdateModel({
+          name,
+          userId,
+          employeeId,
+          perment_address,
+          current_address,
+          primary_mno,
+          secondary_mno,
+          home_mno,
+          work_id,
+          photo,
+          workstatus: "Active",
+          status: "Pending",
+          employData: [{ id, date: new Date() }]
+        });
+
+        await pendingUpdate.save();
       }
 
-      const savedPending = await newPendingEntry.save();
-
-     
-      const existingUpdateData = approvedEmployee.updateData || [];
-      const isUpdateAlreadyLinked = existingUpdateData.some(
-        e => e.id.toString() === savedPending._id.toString()
+      
+      const isUpdateLinked = approvedEmployee.updateData?.some(
+        e => e.id.toString() === pendingUpdate._id.toString()
       );
-      if (!isUpdateAlreadyLinked) {
+
+      if (!isUpdateLinked) {
         approvedEmployee.updateData.push({
-          id: savedPending._id,
+          id: pendingUpdate._id,
           date: new Date()
         });
+
         await approvedEmployee.save();
       }
 
       res.json({
-        message: "Employee data copied to pending model for approval and references updated",
-        employee: savedPending
+        message: "Employee data copied/updated in pending model for approval, and references updated.",
+        employee: pendingUpdate
       });
 
     } catch (err) {
-      res.status(500).json({ message: "Error creating pending approval", error: err.message });
+      res.status(500).json({
+        message: "Error while creating/updating pending approval",
+        error: err.message
+      });
     }
   }
 ];
+
 
 
 module.exports.fetchEmployeesbyId = async (req, res) => {
@@ -455,27 +499,48 @@ module.exports.updateWorkstatus = async (req, res) => {
 
 
 
+
+
 module.exports.DeletependingEmployee = async (req, res) => {
   const id = req.params.id;
 
   try {
-      const user = await UpdateModel.findById(id);
+    const user = await UpdateModel.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Employee not found" });
     }
 
-    if (user.status !== 'Pending') {
-      return res.status(400).json({ message: "Only pending employees can be deleted" });
+    const employeeId = user._id.toString(); 
+
+    // Check related documents
+    const relatedDocs = await Promise.all([
+      UpdatedAadhar.findOne({ employee_id: employeeId }),
+      Aadhar.findOne({ employee_id: employeeId }),
+      Pan.findOne({ employee_id: employeeId }),
+      UpdatedPan.findOne({ employee_id: employeeId }),
+      BankDetail.findOne({ employee_id: employeeId }),
+      UpdatedBankDetail.findOne({ employee_id: employeeId })
+    ]);
+
+    const hasRelatedDocs = relatedDocs.some(doc => doc !== null);
+
+    if (hasRelatedDocs) {
+      return res.status(400).json({
+        message: "Cannot delete employee. Remove associated documents (Aadhar, PAN, Bank, etc.) first."
+      });
     }
 
+    
     await UpdateModel.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Pending employee deleted successfully" });
+
   } catch (err) {
-    res.status(500).json({ message: "Error deleting user", error: err.message });
+    res.status(500).json({ message: "Error deleting employee", error: err.message });
   }
 };
+
 
 
 

@@ -18,5 +18,7 @@ router.get('/fetchallrejected',PanController.fetchAllRejectedPan);
 router.get('/fetchapprovedpanbyid/:id',PanController.fetchapprovPanByItsId);
 router.get('/fetchallrejectpanbyuserId/:id',PanController.fetchRejectedPanByUserId);
 router.get('/fetchallapprovedpanbyuserId/:id',PanController.fetchApprovedPanByUserId);
+router.get('/fetchapprovpanbyemployeeid/:id',PanController.fetctApprovedpanbyemployeeid);
+
 
 module.exports=router

@@ -394,6 +394,15 @@ module.exports.fetchbankdetailbyemployeid= async(req,res)=>{
       res.status(500).json({message:"Error retrieving bank details",error:err.message})
       }
 }
+module.exports.fetchApprovbankdetailbyemployeid= async(req,res)=>{
+  try{
+    const bankdetail=await BankDetail.find({employee_id:req.params.id}).populate('bank_id employee_id');
+    res.json({message:"Bank details retrieved successfully",bankdetail:bankdetail})
+    }
+    catch(err){
+      res.status(500).json({message:"Error retrieving bank details",error:err.message})
+      }
+}
 module.exports.fetchbankdetailsbyitid= async(req,res)=>{
   try{
     const bankdetail= await UpdatedBankDetail.findById(req.params.id).populate('bank_id employee_id');

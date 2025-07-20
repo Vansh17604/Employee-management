@@ -255,6 +255,15 @@ module.exports.fetctpanbyemployeeid= async(req,res)=>{
             }
 }
 
+module.exports.fetctApprovedpanbyemployeeid= async(req,res)=>{
+    try {
+        const pan = await Pan.find({ employee_id: req.params.id });
+        res.json({pan:pan});
+        } catch (err) {
+            res.status(500).json({ message: "Error fetching pan data", error: err.message});
+            }
+}
+
 module.exports.fetchpanbyitsid=async(req,res)=>{
     try{
         const pan = await UpdatedPan.findById(req.params.id);

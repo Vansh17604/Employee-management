@@ -151,6 +151,26 @@ const useAadharStore = create((set) => ({
         return false;
   }
 },
+fetchApprovedBankDetailsByEmployeeId: async (employeeId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovebankdetailsbyemployeeid/${employeeId}`, config);
+    const { bankdetail } = res.data;
+
+    set({
+      approvedBankDetails: bankdetail,
+      loading: false,
+      error: null
+    });
+
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved bank details by employee ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
 fetchAadharByItsOwnId: async (id) => {
   set({ loading: true, error: null });
   try {
@@ -321,6 +341,27 @@ fetchApprovedAadharById: async (id) => {
     return false;
   }
 },
+fetchApprovedAadharByEmployeeId: async (employeeId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovedaadharbyemployeeid/${employeeId}`, config);
+    const { aadhar } = res.data;
+
+    set({
+      approvedAadhars: aadhar,
+      loading: false,
+      error: null
+    });
+
+    return aadhar;
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Error fetching approved Aadhar by employee ID';
+    set({ error: msg, loading: false });
+    toast.error(msg);
+    return false;
+  }
+},
+
 
 
 

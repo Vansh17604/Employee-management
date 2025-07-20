@@ -25,9 +25,9 @@ export default function ViewApprovalEmployees() {
   const { 
     loading, 
     error, 
-    approvedEmployees, 
+    userEmployees, 
     deleteEmployee,
-    fetchApprovedEmployeesByUserId,
+    fetchEmployeesByUserId,
     updateEmployeeWorkstatus,
     clearError 
   } = useEmployeeStore();
@@ -38,9 +38,9 @@ export default function ViewApprovalEmployees() {
     clearError();
       
     if (user && user?.id) {
-      fetchApprovedEmployeesByUserId(user?.id);
+      fetchEmployeesByUserId(user?.id);
     }
-  }, [clearError, fetchApprovedEmployeesByUserId, user]);
+  }, [clearError, fetchEmployeesByUserId, user]);
 
   useEffect(() => {
     if (error) {
@@ -88,7 +88,7 @@ export default function ViewApprovalEmployees() {
     if (success) {
       setToggleSuccess(true);
       if (user && user?.id) {
-        fetchApprovedEmployeesByUserId(user?.id);
+        fetchEmployeesByUserId(user?.id);
       }
     }
   };
@@ -111,7 +111,7 @@ export default function ViewApprovalEmployees() {
       setIsDeleteModalOpen(false);
       setSelectedEmployee(null);
       if (user && user?.id) {
-        fetchApprovedEmployeesByUserId(user?.id);
+        fetchEmployeesByUserId(user?.id);
       }
     }
   };
@@ -129,7 +129,7 @@ export default function ViewApprovalEmployees() {
     navigate(`/employee/employeedetails/${employee._id}`);
   };
 
-  const filteredEmployees = approvedEmployees.filter(employee => {
+  const filteredEmployees = userEmployees.filter(employee => {
     const matchesSearch = employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          employee.primary_mno?.toString().includes(searchTerm) ||
                          employee.secondary_mno?.toString().includes(searchTerm) ||

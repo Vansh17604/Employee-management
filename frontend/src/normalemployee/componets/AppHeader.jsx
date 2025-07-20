@@ -36,7 +36,7 @@ const AppHeader = ({ onToggleSidebar }) => {
   // Get auth store functions and state
   const { user, logout, getUserById, loading, error } = useAuthStore();
   
-  const appName = "View User Panel";
+  const appName = "Supervisor Panel";
   const version = "v2.1.0";
 
  
@@ -227,13 +227,15 @@ const AppHeader = ({ onToggleSidebar }) => {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-24 md:max-w-32 lg:max-w-40">
                       {userLoading ? 'Loading...' : displayName}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-24 md:max-w-32 lg:max-w-40">
-                                                  {displayRole.toLowerCase() === 'normalemployee' && (
-  <div className="text-sm font-semibold text-gray-900 dark:text-white">
-    View User
-  </div>
-)}
-                    </p>
+       <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-24 md:max-w-32 lg:max-w-40">
+  {displayRole.toLowerCase() === 'normalemployee' && (
+    <div className="text-sm font-semibold text-gray-900 dark:text-white">
+      Supervisor 
+    </div>
+  )}
+</div>
+
+
                   </div>
                   <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
                 </button>
@@ -264,7 +266,7 @@ const AppHeader = ({ onToggleSidebar }) => {
                       <button
                         onClick={() => {
                           setIsProfileOpen(false);
-                          navigate('/profile');
+                          navigate('/normalemployee/supervisorprofile');
                         }}
                         className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 transition-colors"
                       >

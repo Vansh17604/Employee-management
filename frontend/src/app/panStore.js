@@ -167,6 +167,26 @@ fetchPanById: async (id) => {
     return false;
   }
 },
+fetchApprovedPanByEmployeeId: async (employeeId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovpanbyemployeeid/${employeeId}`, config);
+    const { pan } = res.data;
+
+    set({
+      approvedPans: pan,
+      loading: false,
+      error: null
+    });
+
+    return pan;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved PAN by employee ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
 fetchPendingPanByUserId: async (userId) => {
   set({ loading: true, error: null });
   try {

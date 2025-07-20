@@ -154,6 +154,27 @@ const useBankdetailStore = create((set) => ({
 
   }
 },
+fetchApprovedBankDetailsByEmployeeId: async (employeeId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await axios.get(`${base_url}/fetchapprovebankdetailsbyemployeeid/${employeeId}`, config);
+    const { bankdetail } = res.data;
+
+    set({
+      approvedBankDetails: bankdetail,
+      loading: false,
+      error: null
+    });
+
+    return bankdetail;
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Error fetching approved bank details by employee ID';
+    set({ error: errorMessage, loading: false });
+    toast.error(errorMessage);
+    return false;
+  }
+},
+
  fetchBankDetailByItsId: async (id) => {
     set({ loading: true, error: null });
     try {

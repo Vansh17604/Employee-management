@@ -1,6 +1,7 @@
 const Work = require('../models/work');
 const { check, validationResult } = require('express-validator');
-
+const UpdateModel = require('../models/update');
+const Employee = require('../models/employee');
 
 
 module.exports.createWork = [
@@ -63,6 +64,23 @@ module.exports.deleteWork = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Check if any UpdateModel documents reference this work_id
+    const relatedUpdates = await UpdateModel.findOne({ work_id: id });
+    if (relatedUpdates) {
+      return res.status(400).json({
+        message: 'Please delete related update records before deleting this work.'
+      });
+    }
+
+    // Check if any Employee documents reference this work_id
+    const relatedEmployees = await Employee.findOne({ work_id: id });
+    if (relatedEmployees) {
+      return res.status(400).json({
+        message: 'Please delete related employees before deleting this work.'
+      });
+    }
+
+    // If no related records, delete the work entry
     const deletedWork = await Work.findByIdAndDelete(id);
 
     if (!deletedWork) {

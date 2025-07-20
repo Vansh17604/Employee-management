@@ -6,7 +6,7 @@ const AppFooter = () => {
   const [stats, setStats] = useState([]);
   
   const currentYear = new Date().getFullYear();
-  const appName = "Edit User Panel";
+  const appName = "Manager Panel";
   const version = "v2.1.0";
   
   // Mock loading effect

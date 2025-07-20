@@ -353,6 +353,15 @@ module.exports.fetchaadharbyemployeid= async(req,res)=>{
       res.status(500).json({message:"error fetching aadhar",error:err.message});
       }
 }
+module.exports.fetchapproveaadharbyemployeid= async(req,res)=>{
+  const employeeId= req.params.id;
+  try{
+    const aadhar= await Aadhar.find({employee_id:employeeId}).populate('employee_id');
+    res.json({message:"aadhar fetched successfully",aadhar:aadhar});
+    }catch(err){
+      res.status(500).json({message:"error fetching aadhar",error:err.message});
+      }
+}
 
 module.exports.fetchaadharbyitsid= async(req,res)=>{
   const id= req.params.id;

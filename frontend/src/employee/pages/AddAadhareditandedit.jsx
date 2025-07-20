@@ -12,7 +12,7 @@ const AddAadhareditandedit = () => {
   const {user}= useAuthStore();
   const location = useLocation();
 const queryParams = new URLSearchParams(location.search);
-const type = queryParams.get("type"); // could be "approve"
+const type = queryParams.get("type"); 
 
   const userId= user?.id;
 const { 
@@ -71,9 +71,16 @@ const handleSubmit = async (data) => {
         result = await editPendingAadhar(aadharId, data);
       }
 
+
       if (result) {
-        toast.success('Aadhar card updated successfully!');
-        navigate('/employee/viewemployee');
+         toast.success('Aadhar card updated successfully!');
+       
+        if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
+  
       }
     } else {
       const aadharData = {
@@ -84,7 +91,7 @@ const handleSubmit = async (data) => {
       result = await createAadhar(aadharData);
       if (result) {
         toast.success('Aadhar card added successfully!');
-        navigate('/employee/viewemployee');
+        navigate('/employee/viewpendingdocument');
       }
     }
   } catch (error) {
@@ -94,7 +101,15 @@ const handleSubmit = async (data) => {
 
 
   const handleCancel = () => {
-    navigate('/employee/viewemployee');
+       if (isEditMode) {
+      if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
+  }else{
+    navigate('/employee/viewpendingdocument');
+  }
   };
 
   if (dataLoading) {

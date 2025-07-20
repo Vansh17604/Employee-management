@@ -6,7 +6,7 @@ const AppFooter = () => {
   const [userStats, setUserStats] = useState(null);
   
   const currentYear = new Date().getFullYear();
-  const appName = "Employee Portal";
+  const appName = "Supervisor Panel";
   const version = "v1.2.0";
   
   // Update current time

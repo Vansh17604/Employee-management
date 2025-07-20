@@ -68,7 +68,11 @@ const handleSubmit = async (data) => {
 
       if (result) {
         toast.success('PAN card updated successfully!');
-        navigate('/employee/viewapprov');
+           if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
       }
     } else {
       const panData = {
@@ -79,7 +83,7 @@ const handleSubmit = async (data) => {
       result = await createPan(panData);
       if (result) {
         toast.success('PAN card added successfully!');
-        navigate('/employee/viewapprov');
+        navigate('/employee/viewpendingdocument');
       }
     }
   } catch (error) {
@@ -89,7 +93,15 @@ const handleSubmit = async (data) => {
 
 
   const handleCancel = () => {
-    navigate('/employee/viewapprov');
+       if (isEditMode) {
+      if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
+  }else{
+    navigate('/employee/viewpendingdocument');
+  }
   };
 
   if (dataLoading) {

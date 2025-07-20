@@ -22,5 +22,7 @@ router.get('/fetchallpendingaadhar',AadharController.fetchAllPendingAadhar);
 router.get('/fetchapprovedaadhar',AadharController.fetchAllApprovedAadhar);
 router.get('/fetchrejectedaadhar',AadharController.fetchAllRejectedAadhar);
 router.get('/fetchapprovaadharbyid/:id',AadharController.fetchaprovaadharbyitsid);
+router.get('/fetchapprovedaadharbyemployeeid/:id',AadharController.fetchapproveaadharbyemployeid);
+
 
 module.exports=router

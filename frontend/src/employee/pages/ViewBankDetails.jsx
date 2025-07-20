@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import useBankdetailStore from '../../app/bankdetailStore'; // Assuming you have a similar store for bank details
+import useBankdetailStore from '../../app/bankdetailStore';
 import { useLocation } from 'react-router-dom';
 import { 
   ArrowLeft,
   Loader2,
   AlertCircle,
-  Building2,
-  CreditCard
+  Edit,
+  Building2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -21,44 +21,59 @@ const ViewBankDetail = () => {
   const [showFullImage, setShowFullImage] = useState(false);
   
   const base_url = import.meta.env.VITE_BASE_URL;
-  const { fetchBankDetailByItsId,fetchApprovedBankDetailById } = useBankdetailStore(); 
+  const { fetchBankDetailByItsId, fetchApprovedBankDetailById } = useBankdetailStore();
+  
+  const location = useLocation();
+ 
+  useEffect(() => {
+    const fetchBankData = async () => {
+      if (!id) return;
+ 
+      try {
+        setLoading(true);
+        setError(null);
+ 
+        const searchParams = new URLSearchParams(location.search);
+        const type = searchParams.get('type');
+ 
+        let bankData;
+ 
+        if (type === 'Aprov') {
+          bankData = await fetchApprovedBankDetailById(id);
+        } else {
+          bankData = await fetchBankDetailByItsId(id);
+        }
+ 
+        if (bankData) {
+          setBankDetail(bankData);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to fetch bank details');
+        console.error('Error fetching bank data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+ 
+    fetchBankData();
+  }, [id, location.search, fetchBankDetailByItsId, fetchApprovedBankDetailById]);
 
- const location = useLocation();
- 
- useEffect(() => {
-   const fetchBankData = async () => {
-     if (!id) return;
- 
-     try {
-       setLoading(true);
-       setError(null);
- 
-       const searchParams = new URLSearchParams(location.search);
-       const type = searchParams.get('type');
-       let bankData;
- 
-       if (type === 'Aprov') {
-         bankData = await fetchApprovedBankDetailById(id);
-       } else {
-         bankData = await fetchBankDetailByItsId(id);
-       }
- 
-       if (bankData) {
-         setBankDetail(bankData);
-       }
-     } catch (err) {
-       setError(err.message || 'Failed to fetch bank details');
-       console.error('Error fetching bank data:', err);
-     } finally {
-       setLoading(false);
-     }
-   };
- 
-   fetchBankData();
- }, [id, location.search, fetchBankDetailByItsId, fetchApprovedBankDetailById]);
- 
   const handleBack = () => {
     navigate('/employee/viewpendingdocument');
+  };
+
+  const handleEdit = () => {
+    const searchParams = new URLSearchParams(location.search);
+        const type = searchParams.get('type');
+         const employeeId =  bankDetail?.employee_id;
+
+        if(type== 'approve'){
+       
+          navigate(`/employee/addbankdetailandedit/${employeeId}/${id}?type=approve`);
+        }else{
+  
+    navigate(`/employee/addbankdetailandedit/${employeeId}/${id}`);
+        }
   };
 
   if (loading) {
@@ -89,7 +104,8 @@ const ViewBankDetail = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="container mx-auto p-6 max-w-4xl">
+      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center">
           <Button 
@@ -102,142 +118,115 @@ const ViewBankDetail = () => {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Bank Details</h1>
-            <p className="text-gray-600">Bank Account Information</p>
+            <h1 className="text-2xl font-bold text-gray-800">Bank Details</h1>
+            <p className="text-gray-600">View Bank Account Information</p>
           </div>
         </div>
+        
+        {/* Edit Button */}
+        <Button 
+          onClick={handleEdit}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Edit className="w-4 h-4 mr-2" />
+          Edit
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Side - Bank Passbook Design */}
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-            <CardTitle className="flex items-center justify-center">
-              <Building2 className="w-6 h-6 mr-2" />
-              Bank Passbook Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="max-w-md mx-auto bg-pink-50 shadow-lg rounded-lg overflow-hidden border-2 border-pink-200">
-              {/* Passbook Header */}
-              <div className="bg-pink-100 p-4 border-b border-pink-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-pink-300 rounded-full flex items-center justify-center mr-3">
-                      <Building2 className="w-5 h-5 text-pink-700" />
-                    </div>
+      {/* Main Content Card */}
+      <Card className="shadow-lg">
+        <CardHeader className="bg-gray-50 border-b">
+          <CardTitle className="flex items-center text-gray-800">
+            <Building2 className="w-5 h-5 mr-2" />
+            Bank Account Information
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Left Side - Bank Details */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Account Information</h3>
+                  
+                  <div className="space-y-3">
                     <div>
-                      <div className="text-pink-800 font-bold text-sm">Bank of India</div>
-                      <div className="text-pink-600 text-xs">Savings Account</div>
+                      <label className="block text-sm font-medium text-gray-600">Account Holder Name</label>
+                      <p className="text-gray-900 font-medium">{bankDetail?.bank_acc_name || 'N/A'}</p>
                     </div>
-                  </div>
-                  <div className="w-16 h-12 bg-white border border-pink-200 flex items-center justify-center rounded">
-                    <div className="w-10 h-8 bg-pink-200 rounded flex items-center justify-center">
-                      <CreditCard className="w-4 h-4 text-pink-600" />
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Account Number</label>
+                      <p className="text-gray-900 font-medium tracking-wider">
+                        {bankDetail?.bank_acc_no || 'N/A'}
+                      </p>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Passbook Content */}
-              <div className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <div className="text-gray-600 font-medium">A/c Name:</div>
-                    <div className="text-gray-800 font-semibold text-sm break-words">
-                      {bankDetail?.bank_acc_name || 'N/A'}
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Branch Name</label>
+                      <p className="text-gray-900 font-medium">{bankDetail?.branch_name || 'N/A'}</p>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-gray-600 font-medium">A/c No:</div>
-                    <div className="text-gray-800 font-semibold text-sm">
-                      {bankDetail?.bank_acc_no || 'N/A'}
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">IFSC Code</label>
+                      <p className="text-gray-900 font-medium tracking-wider">
+                        {bankDetail?.ifsc_code || 'N/A'}
+                      </p>
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <div className="text-gray-600 font-medium">Branch:</div>
-                    <div className="text-gray-800 font-semibold text-sm break-words">
-                      {bankDetail?.branch_name || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-gray-600 font-medium">IFSC Code:</div>
-                    <div className="text-gray-800 font-semibold text-sm">
-                      {bankDetail?.ifsc_code || 'N/A'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Passbook lines simulation */}
-                <div className="pt-4 space-y-2">
-                  <div className="text-xs text-gray-500 font-medium">Recent Transactions:</div>
-                  <div className="space-y-1">
-                    <div className="h-2 bg-gray-200 rounded w-full"></div>
-                    <div className="h-2 bg-gray-200 rounded w-4/5"></div>
-                    <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                </div>
-
-                {/* Bank stamp area */}
-                <div className="flex justify-end pt-2">
-                  <div className="w-12 h-12 border-2 border-dashed border-pink-300 rounded-full flex items-center justify-center">
-                    <div className="text-pink-400 text-xs font-bold">BANK</div>
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Right Side - Actual Passbook Image */}
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-            <CardTitle className="flex items-center justify-center">
-              <CreditCard className="w-6 h-6 mr-2" />
-              Uploaded Passbook
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <img
-                  src={`${base_url}${bankDetail?.passbook_image}`}
-                  alt="Bank Passbook"
-                  onClick={() => setShowFullImage(true)}
-                  className="w-full max-w-md h-auto rounded-lg object-cover border-4 border-blue-100 cursor-pointer hover:opacity-90 transition-opacity shadow-md"
-                />
+            {/* Right Side - Bank Passbook Image */}
+            <div className="space-y-4">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Uploaded Document</h3>
               </div>
               
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Click image to view full size</p>
+              <div className="flex flex-col items-center">
+                <div className="relative">
+                  <img
+                    src={`${base_url}${bankDetail?.passbook_image}`}
+                    alt="Bank Passbook"
+                    onClick={() => setShowFullImage(true)}
+                    className="w-full max-w-sm h-auto rounded-lg object-cover border-2 border-gray-200 cursor-pointer hover:opacity-90 transition-opacity shadow-sm"
+                  />
+                </div>
+                
+                <div className="text-center mt-3">
+                  <p className="text-sm text-gray-500">Click image to view full size</p>
+                </div>
               </div>
             </div>
+            
+          </div>
+        </CardContent>
+      </Card>
 
-            {/* Full Image Modal */}
-            {showFullImage && (
-              <div
-                className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
-                onClick={() => setShowFullImage(false)}
-              >
-                <img
-                  src={`${base_url}${bankDetail?.passbook_image}`}
-                  alt="Full Bank Passbook"
-                  className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-lg"
-                />
-                <button
-                  onClick={() => setShowFullImage(false)}
-                  className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-gray-300 transition-colors"
-                >
-                  &times;
-                </button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Full Image Modal */}
+      {showFullImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+          onClick={() => setShowFullImage(false)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <img
+              src={`${base_url}${bankDetail?.passbook_image}`}
+              alt="Full Bank Passbook"
+              className="max-w-full max-h-full rounded-lg shadow-lg"
+            />
+            <button
+              onClick={() => setShowFullImage(false)}
+              className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -323,7 +323,7 @@ const Sidebar = () => {
         {!collapsed && (
           <div className="flex items-center gap-2">
             <User className="h-6 w-6 text-blue-600" />
-            <span className="font-bold text-xl text-blue-600">EDIT User Panel</span>
+            <span className="font-bold text-xl text-blue-600"> Manager Panel</span>
           </div>
         )}
         {collapsed && (
@@ -391,7 +391,7 @@ const Sidebar = () => {
             <span className="text-xs text-muted-foreground truncate">
              {displayRole.toLowerCase() === 'employee' && (
   <div className="text-lg font-semibold text-gray-900 dark:text-white">
-    EDIT User
+     Manager 
   </div>
 )}
             </span>

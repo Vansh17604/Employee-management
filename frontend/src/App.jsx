@@ -43,9 +43,13 @@ import AdminApprovedDocuments from './admin/pages/ApprovedDocument';
 import ViewApprovedDocuments from './employee/pages/ViewApprovedDocument';
 import ViewRejectedDocuments from './employee/pages/ViewRejectedDocument';
 import NormalViewApprovedDocument from './normalemployee/pages/normalViewApprovedDocument';
-import NormalAadhar from './normalemployee/pages/NormalAadhar';
+import NormalDocumentView from './normalemployee/pages/NormalDocumentView';
 import NormalPan from './normalemployee/pages/NormalPan';
 import NormalBankDetail from './normalemployee/pages/NormalBankdetails';
+import ManegerChangepassword from './employee/pages/ManegerChangepassword';
+import MangeProfile from './employee/pages/MangeProfile';
+import SuperviserChangePassword from './normalemployee/pages/SuperviserChangePassword';
+import SupervisorProfile from './normalemployee/pages/SupervisorProfile';
 
 
 
@@ -172,6 +176,8 @@ function App() {
              <Route path='viewbankdetails/:id' element={<ViewBankDetail/>}/>
              <Route path='viewrejectedocument' element={<ViewRejectedDocuments/>}/>
              <Route path='viewapprovedocument' element={<ViewApprovedDocuments/>}/>
+             <Route path='managerprofile' element={<MangeProfile/>}/>
+             <Route path='managerchangepassworg' element={<ManegerChangepassword/>}/>
 
             </Route>
                <Route
@@ -187,9 +193,11 @@ function App() {
             <Route path='viewapproveddata' element={<ViewAprovweddata/>}/>
             <Route path='normalemployeeview/:employeeId' element={<NormalEmployeeView/>}/>
             <Route path='normalapproveddocument' element={<NormalViewApprovedDocument/>}/>
-            <Route path='normalaadhar/:id'  element={<NormalAadhar/>}/>
+            <Route path='normaldocument/:employeeId'  element={<NormalDocumentView/>}/>
             <Route path='normalpan/:id'  element={<NormalPan/>}/>
             <Route path='normalbankdetails/:id'  element={<NormalBankDetail/>}/>
+            <Route path='supervisorprofile' element={<SupervisorProfile/>}/>
+            <Route path='supervisorchangepassword' element={<SuperviserChangePassword/>}/>
             </Route>
 
           

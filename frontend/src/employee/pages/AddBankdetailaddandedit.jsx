@@ -68,7 +68,11 @@ const type = queryParams.get("type"); // "approve" or null
 
       if (result) {
         toast.success('Bank details updated successfully!');
-        navigate('/employee/viewapprov');
+            if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
       }
     } else {
       const bankDetailData = {
@@ -79,7 +83,7 @@ const type = queryParams.get("type"); // "approve" or null
       result = await createBankDetail(bankDetailData);
       if (result) {
         toast.success('Bank details added successfully!');
-        navigate('/employee/viewapprov');
+        navigate('/employee/viewpendingdocument');
       }
     }
   } catch (error) {
@@ -89,7 +93,15 @@ const type = queryParams.get("type"); // "approve" or null
 
 
   const handleCancel = () => {
-    navigate('/employee/viewapprov');
+    if (isEditMode) {
+      if (type === "approve") {
+      navigate('/employee/viewapprovedocument');
+    } else {
+      navigate('/employee/viewreject');
+    }
+  }else{
+    navigate('/employee/viewpendingdocument');
+  }
   };
 
   if (dataLoading) {

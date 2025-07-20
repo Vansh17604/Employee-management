@@ -45,11 +45,6 @@ const useNav = () => {
       title:"View employee",
       path:"/normalemployee/viewapproveddata",
       icon:<User size={20} />
-    },{
-      type: "item",
-      title:"View Documents",
-      path:"/normalemployee/normalapproveddocument",
-      icon:<FileText size={20} />
     }
    
   ];
@@ -274,7 +269,7 @@ const Sidebar = () => {
               <User className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <span className="font-bold text-lg text-blue-700 dark:text-blue-300">View User Panel</span>
+              <span className="font-bold text-lg text-blue-700 dark:text-blue-300">Supervisor Panel</span>
 
             </div>
           </div>
@@ -349,7 +344,7 @@ const Sidebar = () => {
             <span className="text-xs text-muted-foreground truncate">
                       {displayRole.toLowerCase() === 'normalemployee' && (
   <div className="text-lg font-semibold text-gray-900 dark:text-white">
-    View User
+    Supervisor 
   </div>
 )}
             </span>

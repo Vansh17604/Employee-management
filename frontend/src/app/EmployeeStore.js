@@ -36,11 +36,19 @@ const useEmployeeStore = create((set) => ({
       toast.success("Employee created and sent for approval");
       return res.data.employee;
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Error creating employee';
-      set({ error: errorMessage, loading: false });
-      toast.error(errorMessage);
-      return false;
-    }
+  let errorMessage = 'Error creating employee';
+
+  if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+  
+    errorMessage = err.response.data.errors[0].msg;
+  } else if (err.response?.data?.message) {
+    errorMessage = err.response.data.message;
+  }
+
+  set({ error: errorMessage, loading: false });
+  toast.error(errorMessage);
+  return false;
+}
   },
 
   approveEmployee: async (id) => {

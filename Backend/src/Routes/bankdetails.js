@@ -22,5 +22,6 @@ router.get('/fetchallrejectedbankdetails',BankDetailController.fetchAllRejecedBa
 router.get('/fetchapprovedbankdetailbyuserid/:id',BankDetailController.fetchapprovbankdetailsbyitid);
 router.get('/fetchallrejectedbankdetailsbyuserid/:id',BankDetailController.fetchallRejectedbankdetailsbyuserid);
 router.get('/fetchallapprovedbankdetailvyuserid/:id',BankDetailController.fetchallApprovedbankdetailsbyuserid);
+router.get('/fetchapprovebankdetailsbyemployeeid/:id',BankDetailController.fetchApprovbankdetailbyemployeid);
 
 module.exports=router

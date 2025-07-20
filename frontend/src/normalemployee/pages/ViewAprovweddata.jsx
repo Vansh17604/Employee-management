@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, Search, AlertCircle, CheckCircle, Eye } from "lucide-react";
+import { Users, Search, AlertCircle, CheckCircle, Eye, FileText } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { useNavigate } from "react-router-dom";
@@ -39,8 +39,11 @@ export default function ViewAprovweddata() {
   const handleViewDetails = (id) => {
     navigate(`/normalemployee/normalemployeeview/${id}`);
   };
+  const handleViewDocuments = (id) => {
+    navigate(`/normalemployee/normaldocument/${id}`);
+  };
 
-
+  
   const filteredUsers = approvedEmployees.filter(user => {
     return (
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -152,6 +155,11 @@ export default function ViewAprovweddata() {
                       const employee = user;
                       if (!employee) return null;
                       
+                      // Get the updateData _id (assuming you want the latest one)
+                      const updateDataId = employee.updateData && employee.updateData.length > 0 
+                        ? employee.updateData[employee.updateData.length - 1].id 
+                        : employee._id; // fallback to employee._id if no updateData
+                      
                       return (
                         <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -190,7 +198,7 @@ export default function ViewAprovweddata() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                               <Button
-                                onClick={() => handleViewDetails(employee._id)}
+                                onClick={() => handleViewDetails(employee?._id)}
                                 variant="outline"
                                 size="sm"
                                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -198,6 +206,15 @@ export default function ViewAprovweddata() {
                                 <Eye className="h-4 w-4 mr-1" />
                                 View Details
                               </Button>
+                              <Button
+                              onClick={()=>handleViewDocuments(updateDataId)}
+                              variant="outline"
+                                size="sm"
+                                className="text-red-400 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                >
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  View Documents
+                                </Button>
                           </td>
                           
                         </tr>

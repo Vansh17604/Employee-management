@@ -107,11 +107,11 @@ const AppHeader = ({ onToggleSidebar }) => {
           
           {/* Company name - responsive text */}
           <div className="lg:hidden font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
-            <span className="hidden sm:inline">Edit User Pannel</span>
+            <span className="hidden sm:inline"> Manager Panel</span>
         
           </div>
            <div className="hidden md:block  font-bold text-2xl text-gray-900 dark:text-white text-sm sm:text-base truncate">
-            <span className="hidden sm:inline">Edit User Pannel</span>
+            <span className="hidden sm:inline"> Manager Panel</span>
         
           </div>
           
@@ -173,7 +173,7 @@ const AppHeader = ({ onToggleSidebar }) => {
                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-24 md:max-w-32 lg:max-w-40">
                               {displayRole.toLowerCase() === 'employee' && (
   <div className="text-sm font-semibold text-gray-900 dark:text-white">
-    EDIT User
+   Manager 
   </div>
 )}
                   </span>
@@ -199,7 +199,7 @@ const AppHeader = ({ onToggleSidebar }) => {
                       className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => {
                         setShowUserMenu(false);
-                        navigate('/profile');
+                        navigate('/employee/managerprofile');
                       }}
                     >
                       <User size={16} />

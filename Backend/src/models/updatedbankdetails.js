@@ -5,7 +5,7 @@ const updatedBankSchema = new Schema(
   {
     employee_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
+      ref: "UpdateModel",
       required: true,
     },
      userId:{

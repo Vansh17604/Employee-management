@@ -25,12 +25,17 @@ const AddEmployeeandedit = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
-  useEffect(() => {
-    if (employeeId) {
-      setIsEditMode(true);
-      fetchEmployeeData();
-    }
-  }, [employeeId]);
+useEffect(() => {
+  const isValidId = employeeId && employeeId !== 'undefined' && employeeId !== 'null';
+
+  if (isValidId) {
+    setIsEditMode(true);
+    fetchEmployeeData();
+  } else {
+    setIsEditMode(false);
+  }
+}, [employeeId]);
+
 
 const fetchEmployeeData = async () => {
   setDataLoading(true);
@@ -54,18 +59,25 @@ const fetchEmployeeData = async () => {
     try {
       let result;
 
-      if (isEditMode) {
-        if (editType === 'approveemployeeedit') {
-        
-          result = await editApprovedEmployee(employeeId, data);
-        } else {
-          
-          result = await editPendingEmployee(employeeId, data);
-        }
+ if (isEditMode) {
+  if (type === "approve") {
+    result = await editApprovedAadhar(aadharId, data);
+  } else {
+    result = await editPendingAadhar(aadharId, data);
+  }
 
-        if (result) {
-          navigate('/employee/viewemployee');
-        }
+  if (result) {
+    toast.success('Aadhar card updated successfully!');
+
+    
+    if (type === "approve") {
+      navigate('/employee/viewapprove');
+    } else {
+      navigate('/employee/viewemployee');
+    }
+  }
+
+
       } else {
         result = await createEmployee(data);
         if (result) {
@@ -78,7 +90,15 @@ const fetchEmployeeData = async () => {
   };
 
   const handleCancel = () => {
-    navigate('/employee/viewemployee');
+      if (isEditMode) {
+      if (type === "approve") {
+      navigate('/employee/viewapprove');
+    } else {
+      navigate('/employee/viewemployee');
+    }
+  }else{
+    navigate('/employee/viewpendingdocument');
+  }
   };
 
   if (dataLoading) {

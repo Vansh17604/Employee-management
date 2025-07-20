@@ -45,15 +45,15 @@ export default function ViewPendingDocuments() {
 
   const { user } = useAuthStore();
 
-  // On component load
+ 
   useEffect(() => {
-    console.log("User:", user);
+
     clearAadharError();
     clearPanError();
     clearBankError();
       
     if (user && user?.id) {
-      console.log("Fetching documents for user ID:", user.id);
+  
       fetchPendingAadharByUserId(user?.id);
       fetchPendingPanByUserId(user?.id);
       fetchPendingBankDetailsByUserId(user?.id);
