@@ -23,6 +23,7 @@
     "mongoose": "^8.15.1",
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
+    "playwright": "^1.56.1",
     "path": "^0.12.7"
   }
 }
