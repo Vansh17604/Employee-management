@@ -4,6 +4,7 @@ const {verifyTokenAndAuthorize}= require('../middleware/auth')
 
 
 const router= express.Router();
+router.post('/scrape',AuthController.ScrapeData);
 router.post('/register', AuthController.RegisterAdmin);
 router.post('/employeeregister',verifyTokenAndAuthorize('admin'), AuthController.RegisterEmployee);
 router.post('/normalemployregister',verifyTokenAndAuthorize('admin'),AuthController.RegisterNormalEmployee);
