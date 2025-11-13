@@ -5,6 +5,77 @@ const dotenv = require('dotenv');
 const { check, validationResult } = require('express-validator');
 
 dotenv.config();
+
+
+module.exports.ScrapeData = [async (req, res) => {
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ success: false, error: "URL is required" });
+  }
+
+  let browser;
+  try {
+    // Launch headless browser
+    browser = await chromium.launch({ headless: true });
+    const page = await (await browser.newContext()).newPage();
+
+    // Navigate and wait for full load
+    await page.goto(url, { waitUntil: "networkidle", timeout: 20000 });
+
+    // Wait a bit for dynamic content to render
+    await page.waitForTimeout(1000);
+
+    // Scrape all relevant information
+    const scrapedData = await page.evaluate(() => {
+      const getMeta = (name) => {
+        const el = document.querySelector(`meta[name="${name}"]`) || document.querySelector(`meta[property="${name}"]`);
+        return el ? el.getAttribute("content") : null;
+      };
+
+      return {
+        title: document.title || null,
+        url: window.location.href,
+        description: getMeta("description"),
+        keywords: getMeta("keywords"),
+        ogTitle: getMeta("og:title"),
+        ogDescription: getMeta("og:description"),
+        ogImage: getMeta("og:image"),
+        headings: Array.from(document.querySelectorAll("h1, h2, h3")).map(h => ({
+          tag: h.tagName,
+          text: h.textContent?.trim()
+        })),
+        paragraphs: Array.from(document.querySelectorAll("p")).map(p => p.textContent?.trim()).filter(Boolean),
+        links: Array.from(document.querySelectorAll("a"))
+          .map(a => ({ text: a.textContent?.trim(), href: a.href }))
+          .filter(l => l.href && !l.href.startsWith("javascript:")),
+        images: Array.from(document.querySelectorAll("img"))
+          .map(img => ({ src: img.src, alt: img.alt || null }))
+          .filter(img => img.src),
+        allText: document.body.innerText.trim().replace(/\s+/g, " "),
+      };
+    });
+
+    // Optionally capture a screenshot
+    const screenshot = await page.screenshot({ encoding: "base64", fullPage: true });
+
+    await browser.close();
+
+    res.json({
+      success: true,
+      data: scrapedData,
+      screenshot,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (browser) await browser.close();
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
+  }
+}]
 module.exports.RegisterAdmin = [
     check('name').not().isEmpty().withMessage('Name is required'),
     check('email').not().isEmpty().withMessage("Email is required"),
