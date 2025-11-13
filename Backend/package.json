@@ -6,7 +6,7 @@
     "start": "node src/index.js",
      "build": "npm install",
     "dev": "nodemon src/index.js",
-     "install-playwright": "npx playwright install --with-deps"
+     "install-playwright": "npx playwright install --with-deps",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
