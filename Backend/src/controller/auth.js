@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const { check, validationResult } = require('express-validator');
+const { chromium } = require('playwright');
 
 dotenv.config();
 
